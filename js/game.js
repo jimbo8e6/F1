@@ -443,7 +443,7 @@ function buildStartingGrid(track, playerGridPos, playerTeam) {
 
   grid.splice(Math.max(0, playerGridPos - 1), 0, playerEntry);
 
-  return grid.slice(0, 20);
+  return grid.slice(0, 22); // 11 teams × 2 drivers in 2026
 }
 
 // Get card data by id

@@ -222,16 +222,16 @@ const AI_TEAMS = [
     id: 'alpine', name: 'BWT Alpine F1 Team', shortName: 'Alpine',
     color: '#0090FF', carStrength: 71, pitSpeed: 80, strategySkill: 74, budget: 'mid',
     drivers: [
-      { name: 'Gasly',  number: 10, skill: 81, qualifying: 81, rain: 77 },
-      { name: 'Doohan', number: 7,  skill: 74, qualifying: 75, rain: 70 },
+      { name: 'Gasly',     number: 10, skill: 81, qualifying: 81, rain: 77 },
+      { name: 'Colapinto', number: 43, skill: 75, qualifying: 77, rain: 73 },
     ],
   },
   {
     id: 'racing_bulls', name: 'Visa Cash App RB', shortName: 'Racing Bulls',
     color: '#6692FF', carStrength: 69, pitSpeed: 79, strategySkill: 72, budget: 'lower',
     drivers: [
-      { name: 'Tsunoda', number: 22, skill: 79, qualifying: 81, rain: 75 },
-      { name: 'Lawson',  number: 30, skill: 76, qualifying: 74, rain: 72 },
+      { name: 'Lawson',   number: 30, skill: 76, qualifying: 74, rain: 72 },
+      { name: 'Lindblad', number: 40, skill: 72, qualifying: 74, rain: 68 },
     ],
   },
   {
@@ -248,6 +248,14 @@ const AI_TEAMS = [
     drivers: [
       { name: 'Hülkenberg', number: 27, skill: 83, qualifying: 84, rain: 80 },
       { name: 'Bortoleto',  number: 5,  skill: 75, qualifying: 77, rain: 72 },
+    ],
+  },
+  {
+    id: 'cadillac', name: 'Cadillac F1 Team', shortName: 'Cadillac',
+    color: '#0033A0', carStrength: 62, pitSpeed: 70, strategySkill: 64, budget: 'lower',
+    drivers: [
+      { name: 'Bottas', number: 77, skill: 80, qualifying: 79, rain: 78 },
+      { name: 'Pérez',  number: 11, skill: 78, qualifying: 76, rain: 74 },
     ],
   },
 ];
