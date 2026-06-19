@@ -334,8 +334,9 @@ class RaceSimulation {
   }
 
   simulateAILap(lap) {
-    // Player's effective pace benchmark — average of speed + downforce stats
-    const playerEffective = (this.playerCar.speed + this.playerCar.downforce) / 2;
+    // Player's effective pace benchmark — use team carStrength (same scale as AI field).
+    // Falls back to carStats average for custom teams that have no carStrength.
+    const playerEffective = this.playerTeam?.carStrength ?? Math.round((this.playerCar.speed + this.playerCar.downforce) / 2);
     const baseLapTime = getBaseLapTime(this.track, this.playerCar);
 
     for (const entry of this.standings) {
