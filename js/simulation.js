@@ -334,18 +334,22 @@ class RaceSimulation {
   }
 
   simulateAILap(lap) {
+    // Player's effective pace benchmark — average of speed + downforce stats
+    const playerEffective = (this.playerCar.speed + this.playerCar.downforce) / 2;
     const baseLapTime = getBaseLapTime(this.track, this.playerCar);
 
     for (const entry of this.standings) {
       if (entry.isPlayer) continue;
       if (entry.dnf) continue;
 
-      const strengthFactor = 1 - (entry.carStrength - 70) / 500;
-      let aiLapTime = baseLapTime * strengthFactor;
+      // Each carStrength point above/below player = ±0.15 s/lap.
+      // Positive delta → entry is stronger → faster lap (lower time).
+      const strengthDelta = -(entry.carStrength - playerEffective) * 0.15;
+      let aiLapTime = baseLapTime + strengthDelta;
 
       // Tyre progression
       entry.lapsOnTyre = (entry.lapsOnTyre || 0) + 1;
-      entry.tyreWear = Math.min(100, (entry.tyreWear || 0) + TYRE_COMPOUNDS[entry.tyreCompound || 'medium'].wearRate * (this.track.tyreMult[entry.tyreCompound] || 1.0) * strengthFactor);
+      entry.tyreWear = Math.min(100, (entry.tyreWear || 0) + TYRE_COMPOUNDS[entry.tyreCompound || 'medium'].wearRate * (this.track.tyreMult[entry.tyreCompound] || 1.0));
 
       // AI pit strategy (simplified)
       if (!entry.pitted && entry.tyreWear > 70 && lap > this.laps * 0.3 && lap < this.laps * 0.8) {
@@ -381,7 +385,7 @@ class RaceSimulation {
       entry.lapTime = aiLapTime;
 
       // DNF chance
-      if (Math.random() < 0.002 * strengthFactor) {
+      if (Math.random() < 0.002) {
         entry.dnf = true;
       }
     }
