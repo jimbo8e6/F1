@@ -504,12 +504,12 @@ class RaceSimulation {
     if (outcome.speed_bonus) {
       const laps = outcome.duration || 5;
       this.applySpeedBoost(outcome.speed_bonus * (1 + synergyBonus), laps);
-      result.effects.push(`+${outcome.speed_bonus}s/lap speed boost for ${laps} laps`);
+      result.effects.push(`-${outcome.speed_bonus}s/lap for ${laps} laps`);
     }
     if (outcome.speed_penalty) {
       const laps = outcome.duration || 10;
       this.applySpeedBoost(-outcome.speed_penalty, laps); // negative = slow
-      result.effects.push(`-${outcome.speed_penalty}s/lap for ${laps} laps`);
+      result.effects.push(`+${outcome.speed_penalty}s/lap for ${laps} laps`);
     }
     if (outcome.prevents === 'brake_failure' || outcome.prevents === 'wing_damage') {
       result.effects.push(`Prevented potential ${outcome.prevents.replace('_', ' ')}`);

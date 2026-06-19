@@ -270,16 +270,16 @@ const RaceFlow = {
         break;
       case 'engine_push':
         race.applySpeedBoost(card.value.speed, card.value.laps);
-        result.effects.push(`+${card.value.speed}s/lap for ${card.value.laps} laps`);
+        result.effects.push(`-${card.value.speed}s/lap for ${card.value.laps} laps`);
         break;
       case 'ers_boost':
         race.applySpeedBoost(card.value, 1);
-        result.effects.push(`ERS burst: +${card.value}s this lap`);
+        result.effects.push(`ERS burst: -${card.value}s this lap`);
         break;
       case 'driver_push':
         race.applySpeedBoost(card.value.speed, card.value.laps);
         race.playerTyres[0].wear = Math.min(100, race.playerTyres[0].wear + 10);
-        result.effects.push(`Push mode: +${card.value.speed}s/lap for ${card.value.laps} laps`);
+        result.effects.push(`Push mode: -${card.value.speed}s/lap for ${card.value.laps} laps`);
         break;
       case 'tyre_conserve':
         race.conserveMode = !race.conserveMode;
@@ -329,7 +329,7 @@ const RaceFlow = {
         break;
       case 'drs_boost':
         race.applySpeedBoost(card.value * (race.track.drsZones || 2), 1);
-        result.effects.push(`DRS harvest: +${(card.value * (race.track.drsZones || 2)).toFixed(1)}s this lap`);
+        result.effects.push(`DRS harvest: -${(card.value * (race.track.drsZones || 2)).toFixed(1)}s this lap`);
         break;
       case 'prevent_brake_event':
         result.effects.push(`Brake events prevented for ${card.value} laps`);
@@ -339,7 +339,7 @@ const RaceFlow = {
         break;
       case 'aggressive_stint':
         race.applySpeedBoost(0.6, 15);
-        result.effects.push('+0.6s/lap on aggressive 3-stop strategy');
+        result.effects.push('-0.6s/lap on aggressive 3-stop strategy');
         break;
       case 'hold_position':
         result.effects.push(`Defensive mode for ${card.value} laps`);

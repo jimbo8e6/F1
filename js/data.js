@@ -270,7 +270,7 @@ const ALL_CARDS = [
   {
     id: 'engine_mode_push', name: 'Party Mode', type: 'technical', rarity: 'rare',
     color: '#8844FF', icon: '💜',
-    description: 'Unlock maximum engine mode. +0.4s/lap for 8 laps. Engine life risk.',
+    description: 'Unlock maximum engine mode. -0.4s/lap for 8 laps. Engine life risk.',
     effect: 'engine_push',
     value: { speed: 0.4, laps: 8, reliability_risk: 0.15 },
     uses: 1, timing: 'any',
@@ -301,7 +301,7 @@ const ALL_CARDS = [
   {
     id: 'push_mode', name: 'Push Mode', type: 'driver', rarity: 'common',
     color: '#FF3333', icon: '🏎',
-    description: 'Driver pushes flat out. +0.5s/lap for 5 laps, +30% tyre wear.',
+    description: 'Driver pushes flat out. -0.5s/lap for 5 laps, +30% tyre wear.',
     effect: 'driver_push',
     value: { speed: 0.5, laps: 5, wear_mult: 1.3 },
     uses: 1, timing: 'any',
@@ -311,7 +311,7 @@ const ALL_CARDS = [
   {
     id: 'tyre_management_mode', name: 'Manage Tyres', type: 'driver', rarity: 'common',
     color: '#AAFFAA', icon: '🐢',
-    description: 'Conserve tyres heavily. -0.8s/lap but extend stint by 6 laps.',
+    description: 'Conserve tyres heavily. +0.8s/lap but extend stint by 6 laps.',
     effect: 'tyre_conserve',
     value: { speed: -0.8, wear_reduction: 0.4 },
     uses: 1, timing: 'any',
@@ -479,7 +479,7 @@ const RACE_EVENTS = [
       },
       {
         id: 'stay_slicks', label: 'Stay on slicks',
-        description: 'Gamble that rain stays light. Risk losing 5s/lap if it gets heavier.',
+        description: 'Gamble that rain stays light. Risk +5s/lap if it gets heavier.',
         outcome: { risk: 'heavy_rain_penalty', gamble_bonus: 8, note: 'Gambling on slicks' },
         cardSynergy: [],
       },
@@ -499,7 +499,7 @@ const RACE_EVENTS = [
     choices: [
       {
         id: 'brake_bias', label: 'Adjust brake bias',
-        description: 'Move brake bias to rear. Lose 0.3s/lap but save the brakes.',
+        description: 'Move brake bias to rear. +0.3s/lap but save the brakes.',
         outcome: { speed_penalty: 0.3, prevents: 'brake_failure', note: 'Adjusted brake bias' },
         cardSynergy: ['brake_duct_upgrade'],
       },
@@ -525,7 +525,7 @@ const RACE_EVENTS = [
     choices: [
       {
         id: 'max_attack', label: 'Max Attack mode',
-        description: '+0.5s/lap for 6 laps. Increases engine wear slightly.',
+        description: '-0.5s/lap for 6 laps. Increases engine wear slightly.',
         outcome: { speed_bonus: 0.5, duration: 6, reliability_risk: 0.05, note: 'Max Attack mode' },
         cardSynergy: ['engine_mode_push'],
       },
@@ -537,7 +537,7 @@ const RACE_EVENTS = [
       },
       {
         id: 'charge_ers', label: 'Harvest ERS',
-        description: 'Slow down to recharge. -0.2s/lap now, +0.5s burst later.',
+        description: 'Slow down to recharge. +0.2s/lap now, -0.5s burst later.',
         outcome: { speed_penalty: 0.2, ers_charge: 1.0, note: 'Harvesting ERS for later' },
         cardSynergy: ['ers_deploy'],
       },
@@ -557,7 +557,7 @@ const RACE_EVENTS = [
       },
       {
         id: 'nurse_to_end', label: 'Nurse to the finish',
-        description: 'Baby the tyres. -0.3s/lap but guarantee no cliff.',
+        description: 'Baby the tyres. +0.3s/lap but guarantee no cliff.',
         outcome: { speed_penalty: 0.3, wear_reduction: 0.4, note: 'Nursing tyres to finish' },
         cardSynergy: ['tyre_management_mode', 'tire_wizard'],
       },
@@ -577,7 +577,7 @@ const RACE_EVENTS = [
       },
       {
         id: 'race_without', label: 'Race without DRS',
-        description: 'Stuck closed: lose 0.6s on straights. Stuck open: risk wing damage.',
+        description: 'Stuck closed: +0.6s on straights. Stuck open: risk wing damage.',
         outcome: { speed_penalty: 0.6, risk: 'wing_damage', note: 'Racing without DRS' },
         cardSynergy: ['ers_deploy'],
       },
@@ -683,13 +683,13 @@ const RACE_EVENTS = [
     choices: [
       {
         id: 'stay_focused', label: 'Stay focused',
-        description: 'Calm the driver down. May lose 0.2s/lap for 3 laps.',
+        description: 'Calm the driver down. May cost +0.2s/lap for 3 laps.',
         outcome: { speed_penalty: 0.2, duration: 3, note: 'Staying composed after near miss' },
         cardSynergy: [],
       },
       {
         id: 'use_adrenaline', label: 'Use the adrenaline',
-        description: 'Channel it! +0.5s/lap for 3 laps, but risky.',
+        description: 'Channel it! -0.5s/lap for 3 laps, but risky.',
         outcome: { speed_bonus: 0.5, duration: 3, risk: 'mistake', risk_chance: 0.20, note: 'Riding the adrenaline' },
         cardSynergy: ['push_mode'],
       },
@@ -743,7 +743,7 @@ const RACE_EVENTS = [
     choices: [
       {
         id: 'reduce_power', label: 'Reduce engine mode',
-        description: 'Turn down the engine. -0.5s/lap but protect the engine.',
+        description: 'Turn down the engine. +0.5s/lap but protect the engine.',
         outcome: { speed_penalty: 0.5, prevents: 'engine_failure', note: 'Engine mode reduced' },
         cardSynergy: [],
       },
@@ -763,7 +763,7 @@ const RACE_EVENTS = [
     choices: [
       {
         id: 'implement_now', label: 'Implement for this race',
-        description: 'Gain +0.4s/lap for the rest of the race.',
+        description: 'Gain -0.4s/lap for the rest of the race.',
         outcome: { speed_bonus: 0.4, note: 'Setup change implemented' },
         cardSynergy: ['wind_tunnel_data'],
       },
