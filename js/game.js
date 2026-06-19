@@ -184,6 +184,35 @@ const GameState = {
     return this.round >= this.totalRounds;
   },
 
+  loadFromSave(data) {
+    const team = PLAYER_TEAMS.find(t => t.id === data.teamId);
+    if (!team) return false;
+
+    // Restore team with potentially upgraded driver skills
+    this.team = { ...team, drivers: data.drivers.map(d => ({ ...d })) };
+    this.carStats = { ...data.carStats };
+    this.money = data.money;
+    this.constructorsPoints = data.constructorsPoints;
+    this.rivalPoints = data.rivalPoints;
+    this.season = data.season;
+    this.round = data.round;
+    this.totalRounds = data.totalRounds;
+    this.deck = [...data.deck];
+    this.hand = [...data.hand];
+    this.discard = [...data.discard];
+    this.playedThisRace = [];
+    this.maxHandSize = data.maxHandSize;
+    this.raceCalendar = [...data.raceCalendar];
+    this.currentTrackId = null;
+    this.weekendState = null;
+    this.results = data.results.map(r => ({ ...r }));
+    this.strategyVision = data.strategyVision;
+    this.futureQualiBonus = data.futureQualiBonus;
+    this.wearModifier = data.wearModifier;
+    this.screen = 'map';
+    return true;
+  },
+
   getSeasonResult() {
     const totalPoints = this.constructorsPoints;
     const rival = this.rivalPoints;

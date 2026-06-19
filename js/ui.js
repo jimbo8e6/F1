@@ -27,6 +27,22 @@ const UI = {
   // ============================================================
   showTitle() {
     GameState.screen = 'title';
+    const save = SaveManager.getSummary();
+    const continueBlock = save ? `
+      <div class="save-continue-block">
+        <div class="save-info">
+          <span class="save-team" style="color:${save.teamColor}">${save.teamEmoji} ${save.teamName}</span>
+          <span class="save-meta">Round ${save.round}/${save.totalRounds} · ${save.points} pts · $${save.money.toLocaleString()}</span>
+          <span class="save-date">Saved ${save.savedAt}</span>
+        </div>
+        <div class="save-actions">
+          <button class="btn btn-primary btn-large" onclick="UI.loadSave()">CONTINUE SEASON</button>
+          <button class="btn btn-ghost save-delete-btn" onclick="UI.confirmDeleteSave()">✕ DELETE</button>
+        </div>
+      </div>
+      <div class="save-divider">— or —</div>
+    ` : '';
+
     this.render(`
       <div class="screen title-screen">
         <div class="title-content">
@@ -43,8 +59,9 @@ const UI = {
             <span class="tag">🌧 DYNAMIC EVENTS</span>
             <span class="tag">🏆 SLAY THE GRID</span>
           </div>
-          <button class="btn btn-primary btn-large" onclick="UI.showTeamSelect()">
-            START SEASON
+          ${continueBlock}
+          <button class="btn ${save ? 'btn-secondary' : 'btn-primary btn-large'}" onclick="UI.showTeamSelect()">
+            NEW SEASON
           </button>
         </div>
         <div class="title-bg-elements">
@@ -54,6 +71,35 @@ const UI = {
         </div>
       </div>
     `);
+  },
+
+  loadSave() {
+    const data = SaveManager.load();
+    if (!data || !GameState.loadFromSave(data)) {
+      alert('Save data could not be loaded.');
+      return;
+    }
+    this.showSeasonMap();
+  },
+
+  confirmDeleteSave() {
+    if (confirm('Delete saved season? This cannot be undone.')) {
+      SaveManager.deleteSave();
+      this.showTitle();
+    }
+  },
+
+  manualSave() {
+    const ok = SaveManager.save();
+    const btn = document.getElementById('save-btn');
+    if (btn) {
+      btn.textContent = ok ? '✓ SAVED' : '✗ FAILED';
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.textContent = '💾 SAVE';
+        btn.disabled = false;
+      }, 1800);
+    }
   },
 
   // ============================================================
@@ -109,6 +155,7 @@ const UI = {
   },
 
   selectTeam(teamId) {
+    SaveManager.deleteSave(); // clear any previous run
     GameState.init(teamId);
     this.showSeasonMap();
   },
@@ -130,6 +177,8 @@ const UI = {
   // ============================================================
   showSeasonMap() {
     GameState.screen = 'map';
+    // Auto-save every time we return to the map (safe checkpoint)
+    if (GameState.team) SaveManager.save();
     const cal = GameState.raceCalendar;
     const currentRound = GameState.round;
 
@@ -189,6 +238,7 @@ const UI = {
         <div class="map-bottom-bar">
           <button class="btn btn-ghost" onclick="UI.showDeck()">🃏 VIEW DECK (${GameState.deck.length + GameState.hand.length} cards)</button>
           ${GameState.round > 0 ? `<button class="btn btn-ghost" onclick="UI.showResults()">📊 SEASON RESULTS</button>` : ''}
+          <button class="btn btn-ghost save-btn" onclick="UI.manualSave()" id="save-btn">💾 SAVE</button>
         </div>
       </div>
     `);
