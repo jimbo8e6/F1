@@ -462,11 +462,12 @@ class RaceSimulation {
     const pool = this.track.eventPool || [];
     if (pool.length === 0) return null;
 
-    // Filter out events we've already used (avoid repeats)
+    // Filter out events already used (avoid repeats) and any that belong to qualifying only
+    const raceEventIds = new Set(RACE_EVENTS.map(e => e.id));
     const usedEvents = this.eventHistory.map(e => e.id);
     const available = pool.filter(id => {
-      // Allow safety_car multiple times, but not other events
-      if (id === 'safety_car') return true;
+      if (!raceEventIds.has(id)) return false; // not a valid race event
+      if (id === 'safety_car') return true;     // allow SC multiple times
       return !usedEvents.includes(id);
     });
 

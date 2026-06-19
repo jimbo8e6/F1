@@ -56,7 +56,7 @@ const TRACKS = [
     drsZones: 3, safetyCarChance: 0.18,
     description: 'Abrasive desert surface punishes tyres. Long straights reward power.',
     baseReward: { money: 12000, cardSlots: 2 },
-    eventPool: ['brake_wear', 'desert_heat', 'safety_car', 'tire_strategy', 'engine_mode'],
+    eventPool: ['brake_wear', 'engine_heat', 'safety_car', 'tire_strategy', 'engine_mode'],
   },
   {
     id: 'saudi', name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit',
@@ -68,7 +68,7 @@ const TRACKS = [
     drsZones: 3, safetyCarChance: 0.35,
     description: 'Ultra-fast street circuit. Crashes are likely. DRS crucial.',
     baseReward: { money: 15000, cardSlots: 2 },
-    eventPool: ['safety_car', 'wall_contact', 'drs_failure', 'engine_mode', 'qualifying_crash'],
+    eventPool: ['safety_car', 'wall_contact', 'drs_failure', 'engine_mode', 'narrow_escape'],
   },
   {
     id: 'australia', name: 'Australian Grand Prix', circuit: 'Albert Park Circuit',
@@ -80,7 +80,7 @@ const TRACKS = [
     drsZones: 4, safetyCarChance: 0.22,
     description: 'Semi-street circuit. Unpredictable weather can transform the race.',
     baseReward: { money: 13000, cardSlots: 2 },
-    eventPool: ['rain_shower', 'safety_car', 'driver_error', 'strategy_call', 'tire_strategy'],
+    eventPool: ['rain_shower', 'safety_car', 'driver_error', 'tire_strategy', 'engine_mode'],
   },
   {
     id: 'japan', name: 'Japanese Grand Prix', circuit: 'Suzuka International Racing Course',
@@ -104,7 +104,7 @@ const TRACKS = [
     drsZones: 1, safetyCarChance: 0.40,
     description: 'Impossible to overtake. Qualifying and pit stop timing is everything.',
     baseReward: { money: 22000, cardSlots: 3 },
-    eventPool: ['safety_car', 'wall_contact', 'rain_shower', 'narrow_escape', 'pit_stop_drama', 'qualifying_crash'],
+    eventPool: ['safety_car', 'wall_contact', 'rain_shower', 'narrow_escape', 'pit_stop_drama', 'brake_wear'],
   },
   {
     id: 'spain', name: 'Spanish Grand Prix', circuit: 'Circuit de Barcelona-Catalunya',
@@ -796,26 +796,6 @@ const RACE_EVENTS = [
     ],
   },
   {
-    id: 'qualifying_crash', name: 'Red Flag in Qualifying!',
-    icon: '🔴', severity: 'high',
-    description: 'Red flag! Another car has crashed. Session suspended. You have one flying lap left.',
-    trigger: 'qualifying',
-    choices: [
-      {
-        id: 'new_soft', label: 'New soft tyres',
-        description: 'Fresh rubber guaranteed. But so are your rivals.',
-        outcome: { quali_bonus: 0.3, note: 'New softs for flying lap' },
-        cardSynergy: ['qualifying_lap'],
-      },
-      {
-        id: 'keep_used', label: 'Keep used tyres',
-        description: 'Already warmed up. Might be 0.1s faster in first sector.',
-        outcome: { quali_bonus: 0.1, note: 'Used tyres but already prepped' },
-        cardSynergy: [],
-      },
-    ],
-  },
-  {
     id: 'brake_failure', name: 'Total Brake Failure!',
     icon: '💣', severity: 'critical',
     description: 'Complete brake failure on Turn 1! Driver managed to get it stopped. Miraculous escape.',
@@ -841,6 +821,22 @@ const RACE_EVENTS = [
 // QUALIFYING EVENTS
 // ============================================================
 const QUALIFYING_EVENTS = [
+  {
+    id: 'qualifying_crash', name: 'Red Flag!',
+    icon: '🔴', description: 'Red flag! Another car has crashed. Session suspended. You have one flying lap left.',
+    choices: [
+      {
+        id: 'new_soft', label: 'New soft tyres',
+        description: 'Fresh rubber guaranteed. But so are your rivals.',
+        outcome: { quali_bonus: 0.3, note: 'New softs for flying lap' },
+      },
+      {
+        id: 'keep_used', label: 'Keep used tyres',
+        description: 'Already warmed up. Might be 0.1s faster in first sector.',
+        outcome: { quali_bonus: 0.1, note: 'Used tyres but already prepped' },
+      },
+    ],
+  },
   {
     id: 'yellow_flag', name: 'Yellow Flag!',
     icon: '🟡', description: 'A car has crashed ahead. Yellow flag, cannot push.',
