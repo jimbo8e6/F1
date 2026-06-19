@@ -168,17 +168,88 @@ const TRACKS = [
   },
 ];
 
+// Driver stats: skill = race pace (60-100), qualifying = single-lap pace, rain = wet weather
 const AI_TEAMS = [
-  { id: 'oracle_rb', name: 'Oracle Red Bull Racing', shortName: 'Red Bull', color: '#1E41FF', carStrength: 92, pitSpeed: 95, strategySkill: 90, budget: 'top', drivers: ['Verstappen', 'Pérez'] },
-  { id: 'ferrari', name: 'Scuderia Ferrari', shortName: 'Ferrari', color: '#DC0000', carStrength: 88, pitSpeed: 88, strategySkill: 78, budget: 'top', drivers: ['Leclerc', 'Sainz'] },
-  { id: 'mercedes', name: 'Mercedes-AMG Petronas', shortName: 'Mercedes', color: '#00D2BE', carStrength: 85, pitSpeed: 92, strategySkill: 88, budget: 'top', drivers: ['Hamilton', 'Russell'] },
-  { id: 'mclaren', name: 'McLaren F1 Team', shortName: 'McLaren', color: '#FF8000', carStrength: 82, pitSpeed: 87, strategySkill: 82, budget: 'mid', drivers: ['Norris', 'Piastri'] },
-  { id: 'aston', name: 'Aston Martin Aramco', shortName: 'Aston Martin', color: '#006F62', carStrength: 78, pitSpeed: 83, strategySkill: 80, budget: 'mid', drivers: ['Alonso', 'Stroll'] },
-  { id: 'alpine', name: 'BWT Alpine F1 Team', shortName: 'Alpine', color: '#0090FF', carStrength: 72, pitSpeed: 80, strategySkill: 74, budget: 'mid', drivers: ['Ocon', 'Gasly'] },
-  { id: 'haas', name: 'Haas F1 Team', shortName: 'Haas', color: '#B6BABD', carStrength: 65, pitSpeed: 76, strategySkill: 68, budget: 'lower', drivers: ['Hülkenberg', 'Magnussen'] },
-  { id: 'williams', name: 'Williams Racing', shortName: 'Williams', color: '#005AFF', carStrength: 62, pitSpeed: 74, strategySkill: 70, budget: 'lower', drivers: ['Albon', 'Sargeant'] },
-  { id: 'rb', name: 'Visa Cash App RB', shortName: 'RB', color: '#6692FF', carStrength: 68, pitSpeed: 79, strategySkill: 72, budget: 'lower', drivers: ['Ricciardo', 'Tsunoda'] },
-  { id: 'sauber', name: 'Stake F1 Kick Sauber', shortName: 'Sauber', color: '#52E252', carStrength: 58, pitSpeed: 72, strategySkill: 65, budget: 'lower', drivers: ['Bottas', 'Zhou'] },
+  {
+    id: 'red_bull', name: 'Oracle Red Bull Racing', shortName: 'Red Bull',
+    color: '#1E41FF', carStrength: 88, pitSpeed: 95, strategySkill: 90, budget: 'top',
+    drivers: [
+      { name: 'Verstappen', number: 1,  skill: 99, qualifying: 98, rain: 97 },
+      { name: 'Hadjar',     number: 6,  skill: 77, qualifying: 79, rain: 73 },
+    ],
+  },
+  {
+    id: 'mclaren', name: 'McLaren F1 Team', shortName: 'McLaren',
+    color: '#FF8000', carStrength: 90, pitSpeed: 88, strategySkill: 84, budget: 'top',
+    drivers: [
+      { name: 'Norris',  number: 4,  skill: 92, qualifying: 91, rain: 86 },
+      { name: 'Piastri', number: 81, skill: 88, qualifying: 87, rain: 83 },
+    ],
+  },
+  {
+    id: 'ferrari', name: 'Scuderia Ferrari', shortName: 'Ferrari',
+    color: '#DC0000', carStrength: 87, pitSpeed: 88, strategySkill: 80, budget: 'top',
+    drivers: [
+      { name: 'Leclerc',  number: 16, skill: 92, qualifying: 96, rain: 84 },
+      { name: 'Hamilton', number: 44, skill: 91, qualifying: 87, rain: 96 },
+    ],
+  },
+  {
+    id: 'mercedes', name: 'Mercedes-AMG Petronas', shortName: 'Mercedes',
+    color: '#00D2BE', carStrength: 85, pitSpeed: 92, strategySkill: 88, budget: 'top',
+    drivers: [
+      { name: 'Russell',   number: 63, skill: 86, qualifying: 89, rain: 80 },
+      { name: 'Antonelli', number: 12, skill: 79, qualifying: 83, rain: 75 },
+    ],
+  },
+  {
+    id: 'aston', name: 'Aston Martin Aramco', shortName: 'Aston Martin',
+    color: '#006F62', carStrength: 76, pitSpeed: 83, strategySkill: 80, budget: 'mid',
+    drivers: [
+      { name: 'Alonso', number: 14, skill: 90, qualifying: 84, rain: 89 },
+      { name: 'Stroll', number: 18, skill: 71, qualifying: 70, rain: 72 },
+    ],
+  },
+  {
+    id: 'williams', name: 'Williams Racing', shortName: 'Williams',
+    color: '#005AFF', carStrength: 73, pitSpeed: 78, strategySkill: 72, budget: 'mid',
+    drivers: [
+      { name: 'Sainz', number: 55, skill: 87, qualifying: 86, rain: 83 },
+      { name: 'Albon', number: 23, skill: 82, qualifying: 80, rain: 79 },
+    ],
+  },
+  {
+    id: 'alpine', name: 'BWT Alpine F1 Team', shortName: 'Alpine',
+    color: '#0090FF', carStrength: 71, pitSpeed: 80, strategySkill: 74, budget: 'mid',
+    drivers: [
+      { name: 'Gasly',  number: 10, skill: 81, qualifying: 81, rain: 77 },
+      { name: 'Doohan', number: 7,  skill: 74, qualifying: 75, rain: 70 },
+    ],
+  },
+  {
+    id: 'racing_bulls', name: 'Visa Cash App RB', shortName: 'Racing Bulls',
+    color: '#6692FF', carStrength: 69, pitSpeed: 79, strategySkill: 72, budget: 'lower',
+    drivers: [
+      { name: 'Tsunoda', number: 22, skill: 79, qualifying: 81, rain: 75 },
+      { name: 'Lawson',  number: 30, skill: 76, qualifying: 74, rain: 72 },
+    ],
+  },
+  {
+    id: 'haas', name: 'MoneyGram Haas F1 Team', shortName: 'Haas',
+    color: '#B6BABD', carStrength: 65, pitSpeed: 76, strategySkill: 68, budget: 'lower',
+    drivers: [
+      { name: 'Ocon',    number: 31, skill: 80, qualifying: 78, rain: 81 },
+      { name: 'Bearman', number: 38, skill: 77, qualifying: 76, rain: 74 },
+    ],
+  },
+  {
+    id: 'audi', name: 'Audi F1 Team', shortName: 'Audi',
+    color: '#C0C0C0', carStrength: 68, pitSpeed: 74, strategySkill: 67, budget: 'lower',
+    drivers: [
+      { name: 'Hülkenberg', number: 27, skill: 83, qualifying: 84, rain: 80 },
+      { name: 'Bortoleto',  number: 5,  skill: 75, qualifying: 77, rain: 72 },
+    ],
+  },
 ];
 
 // ============================================================

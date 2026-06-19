@@ -411,11 +411,15 @@ function buildStartingGrid(track, playerGridPos, playerTeam) {
   // Add AI cars (20 cars total)
   for (const team of AI_TEAMS) {
     for (let d = 0; d < team.drivers.length; d++) {
+      const driver = team.drivers[d];
       grid.push({
         team: team.shortName,
         color: team.color,
-        driver: team.drivers[d],
-        carStrength: team.carStrength + (Math.random() - 0.5) * 10,
+        driver: driver.name,
+        driverSkill: driver.skill,
+        driverRainSkill: driver.rain,
+        // Driver skill shifts the effective car strength; teammates are no longer identical
+        carStrength: team.carStrength + (driver.skill - 82) * 0.35 + (Math.random() - 0.5) * 6,
         isPlayer: false,
         totalTime: 0,
         dnf: false,

@@ -18,9 +18,11 @@ function getDriverLapMod(driver) {
 }
 
 // AI laptime for a given team on a track
-function getAILapTime(aiTeam, track) {
+function getAILapTime(aiTeam, track, driverSkill = 82) {
+  // Driver skill shifts effective car strength up/down relative to the team baseline
+  const effectiveStrength = aiTeam.carStrength + (driverSkill - 82) * 0.35;
   const base = (track.lapLength / 0.055);
-  const strengthMod = 1 - (aiTeam.carStrength - 70) / 600;
+  const strengthMod = 1 - (effectiveStrength - 70) / 600;
   return base * strengthMod * (0.97 + Math.random() * 0.06);
 }
 
@@ -53,12 +55,12 @@ class QualifyingSession {
     for (const team of AI_TEAMS) {
       const numDrivers = phase === 'q3' ? 1 : 2;
       for (let d = 0; d < numDrivers; d++) {
-        const baseTime = getAILapTime(team, this.track) * mult;
-        const driverName = team.drivers[d] || `${team.shortName} #${d + 1}`;
+        const driver = team.drivers[d];
+        const baseTime = getAILapTime(team, this.track, driver.qualifying) * mult;
         field.push({
           team: team.shortName,
           color: team.color,
-          driver: driverName,
+          driver: driver.name,
           time: baseTime,
           str: formatLapTime(baseTime),
         });
@@ -356,9 +358,11 @@ class RaceSimulation {
         aiLapTime += this.track.pitlaneTime + (25 - (pitTeam?.pitSpeed || 80) * 0.25) + Math.random() * 3;
       }
 
-      // Rain
+      // Rain — better rain drivers take less of a penalty
       if (this.rainLevel > 0.3 && ['soft', 'medium', 'hard'].includes(entry.tyreCompound)) {
-        aiLapTime += this.rainLevel * 3.5;
+        const rainSkill = entry.driverRainSkill || 76;
+        const rainPenalty = Math.max(1.5, 3.5 - (rainSkill - 76) * 0.04);
+        aiLapTime += this.rainLevel * rainPenalty;
         // AI slowly switches to inters
         if (this.rainLevel > 0.5 && Math.random() < 0.3) {
           entry.tyreCompound = 'inter';
