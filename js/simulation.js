@@ -397,22 +397,23 @@ class RaceSimulation {
     });
   }
 
-  pit(driverIndex, newCompound) {
-    const tyre = this.playerTyres[driverIndex];
-    const oldCompound = tyre.compound;
+  // customPitTime: if provided, used as the total time cost instead of simulating the stop
+  pit(driverIndex, newCompound, customPitTime = null) {
+    const oldCompound = this.playerTyres[driverIndex].compound;
 
+    // Always create a fresh tyre — wear resets to 0
     this.playerTyres[driverIndex] = new TyreState(newCompound);
     this.playerPitStops[driverIndex]++;
     this.playerPitHistory[driverIndex].push({ lap: this.currentLap, compound: newCompound });
 
-    // Calculate pit stop time
-    const pitSpeed = this.playerCar.pitSpeed;
-    const basePit = this.track.pitlaneTime;
-    const crewTime = 2.0 + (100 - pitSpeed) / 50; // 2.0-4.0 sec for tyre change
-    const randomVar = (Math.random() - 0.5) * 1.0;
-    const totalPitTime = basePit + crewTime + randomVar;
+    let totalPitTime;
+    if (customPitTime !== null) {
+      totalPitTime = customPitTime; // event-specified cost (e.g. SC reduces pit penalty)
+    } else {
+      const crewTime = 2.0 + (100 - this.playerCar.pitSpeed) / 50;
+      totalPitTime = this.track.pitlaneTime + crewTime + (Math.random() - 0.5);
+    }
 
-    // Update player entry total time
     const playerEntry = this.standings.find(s => s.isPlayer);
     if (playerEntry) {
       playerEntry.totalTime += totalPitTime;
@@ -424,11 +425,7 @@ class RaceSimulation {
 
     this.recalculatePositions();
 
-    return {
-      oldCompound, newCompound,
-      pitTime: totalPitTime.toFixed(1),
-      lap: this.currentLap,
-    };
+    return { oldCompound, newCompound, pitTime: totalPitTime.toFixed(1), lap: this.currentLap };
   }
 
   triggerSafetyCar(laps = 4) {
@@ -484,22 +481,17 @@ class RaceSimulation {
     // Apply card synergy bonus
     let synergyBonus = cardPlayed && choice.cardSynergy?.includes(cardPlayed) ? 0.15 : 0;
 
-    if (outcome.tyre_change && outcome.new_tyre) {
-      const pitResult = this.pit(0, outcome.new_tyre);
-      result.effects.push(`Pitted for ${TYRE_COMPOUNDS[outcome.new_tyre].name} tyres (${pitResult.pitTime}s stop)`);
+    if (outcome.tyre_change) {
+      const compound = outcome.new_tyre || this.playerTyres[0].compound;
+      const customTime = (outcome.time_penalty != null) ? Math.max(0, outcome.time_penalty - synergyBonus * 5) : null;
+      const pitResult = this.pit(0, compound, customTime);
+      result.effects.push(`Pitted for ${TYRE_COMPOUNDS[compound].name} tyres (${pitResult.pitTime}s stop)`);
     } else if (outcome.time_penalty) {
       const penalty = Math.max(0, outcome.time_penalty - synergyBonus * 5);
       const playerEntry = this.standings.find(s => s.isPlayer);
       if (playerEntry) playerEntry.totalTime += penalty;
       this.recalculatePositions();
       result.effects.push(`+${penalty.toFixed(1)}s time penalty`);
-    }
-
-    if (outcome.tyre_change && !outcome.new_tyre) {
-      // Generic pit (new same compound)
-      const curr = this.playerTyres[0].compound;
-      const pitResult = this.pit(0, curr);
-      result.effects.push(`Pitted for new ${TYRE_COMPOUNDS[curr].name} tyres (${pitResult.pitTime}s stop)`);
     }
 
     if (outcome.speed_bonus) {
