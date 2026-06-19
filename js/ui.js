@@ -253,7 +253,7 @@ const UI = {
     return `
       <div class="card-mini ${selectable ? 'selectable' : ''} ${UI.selectedCard === card.id ? 'selected' : ''}"
            style="--card-color:${card.color}"
-           onclick="${selectable ? `UI.selectCard('${card.id}')` : ''}">
+           onclick="${selectable ? `UI.previewCard('${card.id}')` : ''}">
         <span class="card-mini-icon">${card.icon}</span>
         <span class="card-mini-name">${card.name}</span>
         <span class="card-mini-type type-${card.type}">${card.type[0].toUpperCase()}</span>
@@ -261,13 +261,105 @@ const UI = {
     `;
   },
 
+  // Show enlarged card preview modal before committing to a selection
+  previewCard(cardId) {
+    const card = getCard(cardId);
+    if (!card) return;
+
+    const isSelected = this.selectedCard === cardId;
+    const rarityColors = { common: '#888', uncommon: '#4488ff', rare: '#ff8800', epic: '#aa44ff' };
+    const rarityColor = rarityColors[card.rarity] || '#888';
+    const timingLabel = (card.timing || '').replace(/_/g, ' ').toUpperCase();
+
+    const timingDescriptions = {
+      'any': 'Can be played at any point during the race',
+      'pit stop': 'Play when pitting for maximum effect',
+      'pit window': 'Play when deciding pit stop strategy',
+      'safety car': 'Play when a safety car is deployed',
+      'qualifying': 'Play during a qualifying session',
+      'race': 'Play during the race',
+      'after event': 'Play immediately after an event resolves',
+      'between races': 'Applies permanently between race weekends',
+    };
+    const timingDesc = timingDescriptions[card.timing] || timingLabel;
+
+    // Remove any existing preview
+    document.getElementById('card-preview-overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'card-preview-overlay';
+    overlay.className = 'card-preview-overlay';
+    overlay.innerHTML = `
+      <div class="card-preview-modal" style="--card-color:${card.color}">
+        <div class="card-preview-glow"></div>
+        <div class="card-preview-header">
+          <span class="card-preview-icon">${card.icon}</span>
+          <div class="card-preview-titles">
+            <div class="card-preview-name">${card.name}</div>
+            <div class="card-preview-rarity" style="color:${rarityColor}">${card.rarity.toUpperCase()}</div>
+          </div>
+          <div class="card-preview-type type-${card.type}">${card.type.toUpperCase()}</div>
+        </div>
+
+        <div class="card-preview-divider"></div>
+
+        <div class="card-preview-desc">${card.description}</div>
+
+        <div class="card-preview-timing">
+          <span class="timing-icon">⏰</span>
+          <div>
+            <div class="timing-label">${timingLabel}</div>
+            <div class="timing-desc">${timingDesc}</div>
+          </div>
+        </div>
+
+        ${card.tags?.length ? `
+          <div class="card-preview-tags">
+            ${card.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+          </div>
+        ` : ''}
+
+        ${card.flavorText ? `
+          <div class="card-preview-flavor">"${card.flavorText}"</div>
+        ` : ''}
+
+        <div class="card-preview-actions">
+          ${isSelected ? `
+            <button class="btn btn-ghost" onclick="UI.deselectCard()">DESELECT</button>
+          ` : `
+            <button class="btn btn-primary" onclick="UI.selectCard('${cardId}')">SELECT CARD</button>
+          `}
+          <button class="btn btn-ghost" onclick="document.getElementById('card-preview-overlay').remove()">CANCEL</button>
+        </div>
+      </div>
+    `;
+
+    // Close on backdrop click
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    document.body.appendChild(overlay);
+  },
+
   selectCard(cardId) {
-    this.selectedCard = this.selectedCard === cardId ? null : cardId;
-    // Re-render hand area without full page reload
+    this.selectedCard = cardId;
+    document.getElementById('card-preview-overlay')?.remove();
+    // Refresh any hand area on screen
     const handEl = document.getElementById('hand-area');
-    if (handEl) {
-      handEl.innerHTML = this.renderHandArea();
-    }
+    if (handEl) handEl.innerHTML = this.renderHandArea();
+    // Also refresh event overlay hand if present
+    const eventCards = document.querySelector('.event-cards');
+    if (eventCards) eventCards.innerHTML = this.renderEventHandCards();
+  },
+
+  deselectCard() {
+    this.selectedCard = null;
+    document.getElementById('card-preview-overlay')?.remove();
+    const handEl = document.getElementById('hand-area');
+    if (handEl) handEl.innerHTML = this.renderHandArea();
+    const eventCards = document.querySelector('.event-cards');
+    if (eventCards) eventCards.innerHTML = this.renderEventHandCards();
   },
 
   renderHandArea(synergyCards = []) {
@@ -278,14 +370,27 @@ const UI = {
       return `
         <div class="card-mini ${hasSynergy ? 'synergy' : ''} ${isSelected ? 'selected' : ''}"
              style="--card-color:${card.color}"
-             onclick="UI.selectCard('${card.id}')"
-             title="${card.description}">
+             onclick="UI.previewCard('${card.id}')">
           <span class="card-mini-icon">${card.icon}</span>
           <span class="card-mini-name">${card.name}</span>
           ${hasSynergy ? '<span class="synergy-badge">SYNERGY</span>' : ''}
+          ${isSelected ? '<span class="selected-badge">✓</span>' : ''}
         </div>
       `;
     }).join('');
+  },
+
+  renderEventHandCards(synergyCards = []) {
+    const hand = GameState.hand.map(id => getCard(id)).filter(Boolean);
+    return hand.map(c => `
+      <div class="card-mini ${synergyCards.includes(c.id) ? 'synergy' : ''} ${UI.selectedCard === c.id ? 'selected' : ''}"
+           style="--card-color:${c.color}"
+           onclick="UI.previewCard('${c.id}')">
+        ${c.icon} ${c.name}
+        ${synergyCards.includes(c.id) ? '<span class="synergy-badge">SYNERGY</span>' : ''}
+        ${UI.selectedCard === c.id ? '<span class="selected-badge">✓</span>' : ''}
+      </div>
+    `).join('');
   },
 
   // ============================================================
@@ -1104,10 +1209,10 @@ const UI = {
               ${hand.map(c => `
                 <div class="card-mini ${availableCards.includes(c.id) ? 'synergy' : ''} ${UI.selectedCard === c.id ? 'selected' : ''}"
                      style="--card-color:${c.color}"
-                     onclick="UI.selectCard('${c.id}')"
-                     title="${c.description}">
+                     onclick="UI.previewCard('${c.id}')">
                   ${c.icon} ${c.name}
                   ${availableCards.includes(c.id) ? '<span class="synergy-badge">SYNERGY</span>' : ''}
+                  ${UI.selectedCard === c.id ? '<span class="selected-badge">✓</span>' : ''}
                 </div>
               `).join('')}
             </div>
