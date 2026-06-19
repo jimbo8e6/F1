@@ -13,7 +13,7 @@ const GameState = {
   championshipPosition: 0,
   rivalPoints: 0,           // main rival (championship contender)
 
-  team: null,               // selected PLAYER_TEAMS entry
+  team: null,               // selected team object (from AI_TEAMS or custom)
   carStats: null,           // live car stats (modified by upgrades)
 
   deck: [],                 // card ids in deck
@@ -38,8 +38,7 @@ const GameState = {
   // Persistent modifiers
   wearModifier: 1.0,
 
-  init(teamId) {
-    const team = PLAYER_TEAMS.find(t => t.id === teamId);
+  init(team) {
     this.team = team;
     this.carStats = { ...team.carStats };
     this.money = team.startMoney;
@@ -185,11 +184,14 @@ const GameState = {
   },
 
   loadFromSave(data) {
-    const team = PLAYER_TEAMS.find(t => t.id === data.teamId);
-    if (!team) return false;
+    // For custom teams, the full team object was saved; for real teams look up in AI_TEAMS
+    const baseTeam = data.teamId === 'custom'
+      ? data.customTeam
+      : AI_TEAMS.find(t => t.id === data.teamId);
+    if (!baseTeam) return false;
 
     // Restore team with potentially upgraded driver skills
-    this.team = { ...team, drivers: data.drivers.map(d => ({ ...d })) };
+    this.team = { ...baseTeam, drivers: data.drivers.map(d => ({ ...d })) };
     this.carStats = { ...data.carStats };
     this.money = data.money;
     this.constructorsPoints = data.constructorsPoints;
@@ -406,10 +408,11 @@ const RaceFlow = {
 
 function buildStartingGrid(track, playerGridPos, playerTeam) {
   const grid = [];
-  const playerNames = playerTeam.drivers.map(d => d.name);
 
-  // Add AI cars (20 cars total)
-  for (const team of AI_TEAMS) {
+  // Exclude player's own team so they don't race against themselves
+  const aiField = AI_TEAMS.filter(t => t.id !== playerTeam.id);
+
+  for (const team of aiField) {
     for (let d = 0; d < team.drivers.length; d++) {
       const driver = team.drivers[d];
       grid.push({

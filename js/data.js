@@ -172,7 +172,12 @@ const TRACKS = [
 const AI_TEAMS = [
   {
     id: 'red_bull', name: 'Oracle Red Bull Racing', shortName: 'Red Bull',
-    color: '#1E41FF', carStrength: 88, pitSpeed: 95, strategySkill: 90, budget: 'top',
+    color: '#1E41FF', logoEmoji: '🐂',
+    carStrength: 88, pitSpeed: 95, strategySkill: 90, budget: 'top',
+    carStats: { speed: 84, downforce: 76, reliability: 76, pitSpeed: 95 },
+    startMoney: 70000, difficulty: 'easy',
+    description: 'Verstappen is the best on the grid. Your advantage is immense — but Hadjar needs development.',
+    startingDeck: ['undercut', 'overcut', 'push_mode', 'tire_wizard', 'safety_car_prep', 'engine_mode_push', 'bold_overtake', 'ers_deploy'],
     drivers: [
       { name: 'Verstappen', number: 1,  skill: 99, qualifying: 98, rain: 97 },
       { name: 'Hadjar',     number: 6,  skill: 77, qualifying: 79, rain: 73 },
@@ -180,7 +185,12 @@ const AI_TEAMS = [
   },
   {
     id: 'mclaren', name: 'McLaren F1 Team', shortName: 'McLaren',
-    color: '#FF8000', carStrength: 90, pitSpeed: 88, strategySkill: 84, budget: 'top',
+    color: '#FF8000', logoEmoji: '🟠',
+    carStrength: 90, pitSpeed: 88, strategySkill: 84, budget: 'top',
+    carStats: { speed: 82, downforce: 80, reliability: 78, pitSpeed: 88 },
+    startMoney: 70000, difficulty: 'easy',
+    description: 'The reigning pace-setters. Norris and Piastri give you two genuine title contenders.',
+    startingDeck: ['undercut', 'overcut', 'push_mode', 'tire_wizard', 'safety_car_prep', 'engine_mode_push', 'bold_overtake', 'ers_deploy'],
     drivers: [
       { name: 'Norris',  number: 4,  skill: 92, qualifying: 91, rain: 86 },
       { name: 'Piastri', number: 81, skill: 88, qualifying: 87, rain: 83 },
@@ -188,7 +198,12 @@ const AI_TEAMS = [
   },
   {
     id: 'ferrari', name: 'Scuderia Ferrari', shortName: 'Ferrari',
-    color: '#DC0000', carStrength: 87, pitSpeed: 88, strategySkill: 80, budget: 'top',
+    color: '#DC0000', logoEmoji: '🐎',
+    carStrength: 87, pitSpeed: 88, strategySkill: 80, budget: 'top',
+    carStats: { speed: 80, downforce: 82, reliability: 74, pitSpeed: 88 },
+    startMoney: 70000, difficulty: 'easy',
+    description: "Leclerc's qualifying pace plus Hamilton's wet-weather genius. Stunning potential.",
+    startingDeck: ['undercut', 'overcut', 'push_mode', 'tire_wizard', 'safety_car_prep', 'engine_mode_push', 'bold_overtake', 'ers_deploy'],
     drivers: [
       { name: 'Leclerc',  number: 16, skill: 92, qualifying: 96, rain: 84 },
       { name: 'Hamilton', number: 44, skill: 91, qualifying: 87, rain: 96 },
@@ -196,7 +211,12 @@ const AI_TEAMS = [
   },
   {
     id: 'mercedes', name: 'Mercedes-AMG Petronas', shortName: 'Mercedes',
-    color: '#00D2BE', carStrength: 85, pitSpeed: 92, strategySkill: 88, budget: 'top',
+    color: '#00D2BE', logoEmoji: '⭐',
+    carStrength: 85, pitSpeed: 92, strategySkill: 88, budget: 'top',
+    carStats: { speed: 78, downforce: 78, reliability: 82, pitSpeed: 92 },
+    startMoney: 70000, difficulty: 'easy',
+    description: 'A technical powerhouse rebuilt for the new regulations. Russell leads, Antonelli learns fast.',
+    startingDeck: ['undercut', 'overcut', 'push_mode', 'tire_wizard', 'safety_car_prep', 'engine_mode_push', 'bold_overtake', 'ers_deploy'],
     drivers: [
       { name: 'Russell',   number: 63, skill: 86, qualifying: 89, rain: 80 },
       { name: 'Antonelli', number: 12, skill: 79, qualifying: 83, rain: 75 },
@@ -204,7 +224,12 @@ const AI_TEAMS = [
   },
   {
     id: 'aston', name: 'Aston Martin Aramco', shortName: 'Aston Martin',
-    color: '#006F62', carStrength: 76, pitSpeed: 83, strategySkill: 80, budget: 'mid',
+    color: '#006F62', logoEmoji: '🟢',
+    carStrength: 76, pitSpeed: 83, strategySkill: 80, budget: 'mid',
+    carStats: { speed: 68, downforce: 70, reliability: 72, pitSpeed: 83 },
+    startMoney: 50000, difficulty: 'hard',
+    description: "Alonso's genius can drag this car beyond its limits. Stroll's inconsistency is your biggest internal rival.",
+    startingDeck: ['undercut', 'push_mode', 'tyre_management_mode', 'sponsor_deal', 'fresh_front_wing', 'drs_assist'],
     drivers: [
       { name: 'Alonso', number: 14, skill: 90, qualifying: 84, rain: 89 },
       { name: 'Stroll', number: 18, skill: 71, qualifying: 70, rain: 72 },
@@ -212,7 +237,12 @@ const AI_TEAMS = [
   },
   {
     id: 'williams', name: 'Williams Racing', shortName: 'Williams',
-    color: '#005AFF', carStrength: 73, pitSpeed: 78, strategySkill: 72, budget: 'mid',
+    color: '#005AFF', logoEmoji: '💙',
+    carStrength: 73, pitSpeed: 78, strategySkill: 72, budget: 'mid',
+    carStats: { speed: 64, downforce: 68, reliability: 70, pitSpeed: 78 },
+    startMoney: 42000, difficulty: 'medium',
+    description: 'Sainz has transformed this team. A genuine mid-pack threat with room to grow.',
+    startingDeck: ['undercut', 'overcut', 'push_mode', 'tyre_management_mode', 'fresh_front_wing', 'bold_overtake', 'ers_deploy'],
     drivers: [
       { name: 'Sainz', number: 55, skill: 87, qualifying: 86, rain: 83 },
       { name: 'Albon', number: 23, skill: 82, qualifying: 80, rain: 79 },
@@ -220,7 +250,12 @@ const AI_TEAMS = [
   },
   {
     id: 'alpine', name: 'BWT Alpine F1 Team', shortName: 'Alpine',
-    color: '#0090FF', carStrength: 71, pitSpeed: 80, strategySkill: 74, budget: 'mid',
+    color: '#0090FF', logoEmoji: '🔷',
+    carStrength: 71, pitSpeed: 80, strategySkill: 74, budget: 'mid',
+    carStats: { speed: 62, downforce: 66, reliability: 72, pitSpeed: 80 },
+    startMoney: 40000, difficulty: 'medium',
+    description: "Gasly's experience anchors the team. Colapinto adds flair but needs careful management.",
+    startingDeck: ['undercut', 'overcut', 'push_mode', 'tyre_management_mode', 'fresh_front_wing', 'bold_overtake', 'ers_deploy'],
     drivers: [
       { name: 'Gasly',     number: 10, skill: 81, qualifying: 81, rain: 77 },
       { name: 'Colapinto', number: 43, skill: 75, qualifying: 77, rain: 73 },
@@ -228,7 +263,12 @@ const AI_TEAMS = [
   },
   {
     id: 'racing_bulls', name: 'Visa Cash App RB', shortName: 'Racing Bulls',
-    color: '#6692FF', carStrength: 69, pitSpeed: 79, strategySkill: 72, budget: 'lower',
+    color: '#6692FF', logoEmoji: '⚡',
+    carStrength: 69, pitSpeed: 79, strategySkill: 72, budget: 'lower',
+    carStats: { speed: 60, downforce: 62, reliability: 68, pitSpeed: 79 },
+    startMoney: 38000, difficulty: 'medium',
+    description: 'Lawson is proven, Lindblad is raw talent. Every point is a battle.',
+    startingDeck: ['undercut', 'overcut', 'push_mode', 'tyre_management_mode', 'fresh_front_wing', 'bold_overtake', 'ers_deploy'],
     drivers: [
       { name: 'Lawson',   number: 30, skill: 76, qualifying: 74, rain: 72 },
       { name: 'Lindblad', number: 40, skill: 72, qualifying: 74, rain: 68 },
@@ -236,7 +276,12 @@ const AI_TEAMS = [
   },
   {
     id: 'haas', name: 'MoneyGram Haas F1 Team', shortName: 'Haas',
-    color: '#B6BABD', carStrength: 65, pitSpeed: 76, strategySkill: 68, budget: 'lower',
+    color: '#B6BABD', logoEmoji: '🦅',
+    carStrength: 65, pitSpeed: 76, strategySkill: 68, budget: 'lower',
+    carStats: { speed: 57, downforce: 59, reliability: 65, pitSpeed: 76 },
+    startMoney: 35000, difficulty: 'medium',
+    description: 'Ocon brings F1 experience; Bearman brings energy. Every card in your deck will matter.',
+    startingDeck: ['undercut', 'overcut', 'push_mode', 'tyre_management_mode', 'fresh_front_wing', 'bold_overtake', 'ers_deploy'],
     drivers: [
       { name: 'Ocon',    number: 31, skill: 80, qualifying: 78, rain: 81 },
       { name: 'Bearman', number: 38, skill: 77, qualifying: 76, rain: 74 },
@@ -244,7 +289,12 @@ const AI_TEAMS = [
   },
   {
     id: 'audi', name: 'Audi F1 Team', shortName: 'Audi',
-    color: '#C0C0C0', carStrength: 68, pitSpeed: 74, strategySkill: 67, budget: 'lower',
+    color: '#C0C0C0', logoEmoji: '🔘',
+    carStrength: 68, pitSpeed: 74, strategySkill: 67, budget: 'lower',
+    carStats: { speed: 59, downforce: 61, reliability: 62, pitSpeed: 74 },
+    startMoney: 38000, difficulty: 'medium',
+    description: 'New money, new team. Hülkenberg can punch above weight. Bortoleto has raw potential.',
+    startingDeck: ['undercut', 'overcut', 'push_mode', 'tyre_management_mode', 'fresh_front_wing', 'bold_overtake', 'ers_deploy'],
     drivers: [
       { name: 'Hülkenberg', number: 27, skill: 83, qualifying: 84, rain: 80 },
       { name: 'Bortoleto',  number: 5,  skill: 75, qualifying: 77, rain: 72 },
@@ -252,12 +302,33 @@ const AI_TEAMS = [
   },
   {
     id: 'cadillac', name: 'Cadillac F1 Team', shortName: 'Cadillac',
-    color: '#0033A0', carStrength: 62, pitSpeed: 70, strategySkill: 64, budget: 'lower',
+    color: '#0033A0', logoEmoji: '🇺🇸',
+    carStrength: 62, pitSpeed: 70, strategySkill: 64, budget: 'lower',
+    carStats: { speed: 52, downforce: 54, reliability: 58, pitSpeed: 70 },
+    startMoney: 30000, difficulty: 'hard',
+    description: 'The American dream. Rock bottom of the grid — Bottas and Pérez know how to score points.',
+    startingDeck: ['undercut', 'push_mode', 'tyre_management_mode', 'sponsor_deal', 'fresh_front_wing', 'drs_assist'],
     drivers: [
       { name: 'Bottas', number: 77, skill: 80, qualifying: 79, rain: 78 },
       { name: 'Pérez',  number: 11, skill: 78, qualifying: 76, rain: 74 },
     ],
   },
+];
+
+// Available drivers for custom team selection (reserves + F2 drivers)
+const DRIVER_POOL = [
+  { name: 'Tsunoda',       number: 22, skill: 79, qualifying: 81, rain: 75, cost: 18000, tier: 'F1 Reserve', bio: 'Ex-Racing Bulls. 5 F1 seasons of experience.' },
+  { name: 'M. Schumacher', number: 47, skill: 75, qualifying: 74, rain: 78, cost: 14000, tier: 'F1 Reserve', bio: 'Mercedes reserve. Son of a legend.' },
+  { name: 'Doohan',        number: 61, skill: 74, qualifying: 75, rain: 70, cost: 12000, tier: 'F1 Reserve', bio: 'Ex-Alpine. Fast qualifier, Australian talent.' },
+  { name: 'de Vries',      number: 21, skill: 73, qualifying: 72, rain: 74, cost: 11000, tier: 'F1 Reserve', bio: 'Formula E champion. Ex-AlphaTauri.' },
+  { name: 'Crawford',      number: 20, skill: 73, qualifying: 75, rain: 67, cost: 10000, tier: 'F2',         bio: 'Red Bull junior. F2 frontrunner.' },
+  { name: 'Aron',          number: 50, skill: 72, qualifying: 74, rain: 70, cost:  9000, tier: 'F2',         bio: 'Estonian talent. Multiple F2 wins.' },
+  { name: 'Drugovich',     number: 80, skill: 72, qualifying: 73, rain: 69, cost:  9000, tier: 'F2',         bio: '2022 F2 Champion. Aston Martin reserve.' },
+  { name: 'Martins',       number: 25, skill: 71, qualifying: 73, rain: 68, cost:  8000, tier: 'F2',         bio: 'French Alpine junior.' },
+  { name: 'Maloney',       number: 45, skill: 70, qualifying: 71, rain: 69, cost:  7000, tier: 'F2',         bio: 'Barbadian racer. Strong overtaker.' },
+  { name: 'Maini',         number: 29, skill: 70, qualifying: 70, rain: 71, cost:  6000, tier: 'F2',         bio: 'Experienced F2 campaigner.' },
+  { name: 'Verschoor',     number: 17, skill: 68, qualifying: 69, rain: 66, cost:  5000, tier: 'F2',         bio: 'Dutch veteran of the F2 field.' },
+  { name: 'Hauger',        number: 9,  skill: 67, qualifying: 70, rain: 65, cost:  4500, tier: 'F2',         bio: 'Norwegian talent. Red Bull junior.' },
 ];
 
 // ============================================================
@@ -944,47 +1015,7 @@ const QUALIFYING_EVENTS = [
 
 const POINTS_SYSTEM = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 
-const PLAYER_TEAMS = [
-  {
-    id: 'backmarker', name: 'Phoenix Racing', tier: 'backmarker',
-    description: 'Start from the bottom and prove everyone wrong.',
-    color: '#FF6600', logoEmoji: '🔥',
-    startMoney: 25000,
-    carStats: { speed: 55, downforce: 52, reliability: 60, pitSpeed: 65 },
-    drivers: [
-      { id: 'p1', name: 'Marcus Webb', number: 44, skill: 68, consistency: 72, tyreManagement: 75, qualifying: 65, rain: 70 },
-      { id: 'p2', name: 'Yuki Tanaka', number: 27, skill: 65, consistency: 68, tyreManagement: 80, qualifying: 70, rain: 75 },
-    ],
-    startingDeck: ['undercut', 'push_mode', 'tyre_management_mode', 'sponsor_deal', 'fresh_front_wing', 'drs_assist'],
-    difficulty: 'hard',
-  },
-  {
-    id: 'midfield', name: 'Apex Motorsport', tier: 'midfield',
-    description: 'Consistent points finisher. Occasional podium contender.',
-    color: '#4488FF', logoEmoji: '⚡',
-    startMoney: 40000,
-    carStats: { speed: 72, downforce: 70, reliability: 75, pitSpeed: 78 },
-    drivers: [
-      { id: 'p1', name: 'Carlos Medina', number: 7, skill: 78, consistency: 80, tyreManagement: 74, qualifying: 76, rain: 72 },
-      { id: 'p2', name: 'Sophia Chen', number: 33, skill: 75, consistency: 76, tyreManagement: 82, qualifying: 78, rain: 80 },
-    ],
-    startingDeck: ['undercut', 'overcut', 'push_mode', 'tire_wizard', 'safety_car_prep', 'ers_deploy', 'bold_overtake'],
-    difficulty: 'medium',
-  },
-  {
-    id: 'frontrunner', name: 'Apex Factory Team', tier: 'top',
-    description: 'Championship contender. Win or it\'s a failure.',
-    color: '#FFD700', logoEmoji: '👑',
-    startMoney: 60000,
-    carStats: { speed: 86, downforce: 84, reliability: 82, pitSpeed: 90 },
-    drivers: [
-      { id: 'p1', name: 'Max Reiter', number: 1, skill: 90, consistency: 85, tyreManagement: 82, qualifying: 92, rain: 88 },
-      { id: 'p2', name: 'Lena Brandt', number: 16, skill: 85, consistency: 88, tyreManagement: 87, qualifying: 86, rain: 85 },
-    ],
-    startingDeck: ['undercut', 'overcut', 'push_mode', 'tire_wizard', 'safety_car_prep', 'engine_mode_push', 'bold_overtake', 'defensive_masterclass', 'ers_deploy'],
-    difficulty: 'easy',
-  },
-];
+// Teams are now defined in AI_TEAMS above (each entry includes player-usable fields)
 
 const CARD_REWARDS = [
   ['undercut', 'overcut', 'push_mode', 'tyre_management_mode', 'sponsor_deal'],

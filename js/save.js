@@ -19,6 +19,7 @@ const SaveManager = {
       constructorsPoints: gs.constructorsPoints,
       rivalPoints: gs.rivalPoints,
       teamId: gs.team.id,
+      ...(gs.team.id === 'custom' ? { customTeam: { ...gs.team } } : {}),
       carStats: { ...gs.carStats },
       drivers: gs.team.drivers.map(d => ({ ...d })),
       deck: [...gs.deck],
@@ -63,7 +64,9 @@ const SaveManager = {
   getSummary() {
     const data = this.load();
     if (!data) return null;
-    const team = PLAYER_TEAMS.find(t => t.id === data.teamId);
+    const team = data.teamId === 'custom'
+      ? data.customTeam
+      : AI_TEAMS.find(t => t.id === data.teamId);
     const date = new Date(data.savedAt);
     const timeStr = date.toLocaleString(undefined, {
       month: 'short', day: 'numeric',

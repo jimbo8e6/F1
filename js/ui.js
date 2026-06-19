@@ -107,56 +107,221 @@ const UI = {
   // ============================================================
   showTeamSelect() {
     GameState.screen = 'teamselect';
-    const teams = PLAYER_TEAMS.map(team => `
-      <div class="team-card" onclick="UI.selectTeam('${team.id}')" style="--team-color: ${team.color}">
-        <div class="team-logo">${team.logoEmoji}</div>
-        <div class="team-info">
-          <h3>${team.name}</h3>
-          <div class="team-tier tier-${team.tier}">${team.tier.toUpperCase()}</div>
-          <p>${team.description}</p>
-          <div class="team-stats">
-            ${this.renderStatBar('Speed', team.carStats.speed)}
-            ${this.renderStatBar('Downforce', team.carStats.downforce)}
-            ${this.renderStatBar('Reliability', team.carStats.reliability)}
-            ${this.renderStatBar('Pit Speed', team.carStats.pitSpeed)}
+
+    const renderTeamCard = (team) => `
+      <div class="team-card" onclick="UI.selectTeam('${team.id}')" style="--team-color:${team.color}">
+        <div class="team-card-top">
+          <span class="team-logo">${team.logoEmoji}</span>
+          <div class="team-card-name">
+            <h3>${team.name}</h3>
+            <span class="diff-badge diff-${team.difficulty}">${team.difficulty.toUpperCase()}</span>
           </div>
-          <div class="team-drivers">
-            ${team.drivers.map(d => `
-              <span class="driver-tag">#${d.number} ${d.name}</span>
-            `).join('')}
-          </div>
-          <div class="team-deck-preview">
-            <span class="deck-label">STARTING CARDS:</span>
-            ${team.startingDeck.map(id => {
-              const card = getCard(id);
-              return card ? `<span class="mini-card" style="background:${card.color}22;border-color:${card.color}">${card.icon} ${card.name}</span>` : '';
-            }).join('')}
-          </div>
+          <span class="team-budget">$${(team.startMoney / 1000).toFixed(0)}k</span>
         </div>
-        <div class="team-difficulty">
-          <span class="diff-label">DIFFICULTY</span>
-          <span class="diff-${team.difficulty}">${team.difficulty.toUpperCase()}</span>
+        <p class="team-desc">${team.description}</p>
+        <div class="team-drivers-row">
+          ${team.drivers.map(d => `<span class="driver-tag">#${d.number} ${d.name} <em>${d.skill}</em></span>`).join('')}
+        </div>
+        <div class="team-stats-mini">
+          ${this.renderStatBar('Speed', team.carStats.speed)}
+          ${this.renderStatBar('Downforce', team.carStats.downforce)}
+          ${this.renderStatBar('Reliability', team.carStats.reliability)}
         </div>
       </div>
-    `).join('');
+    `;
+
+    const easy   = AI_TEAMS.filter(t => t.difficulty === 'easy');
+    const medium = AI_TEAMS.filter(t => t.difficulty === 'medium');
+    const hard   = AI_TEAMS.filter(t => t.difficulty === 'hard');
 
     this.render(`
       <div class="screen">
         <div class="screen-header">
           <h2>CHOOSE YOUR TEAM</h2>
-          <p>Select a constructor and begin your championship campaign</p>
+          <p>Select a 2026 constructor or build your own</p>
         </div>
-        <div class="team-select-grid">
-          ${teams}
+
+        <div class="team-select-section">
+          <div class="team-diff-header easy-header">⚡ EASY — Championship Favourites</div>
+          <div class="team-select-grid">${easy.map(renderTeamCard).join('')}</div>
         </div>
+
+        <div class="team-select-section">
+          <div class="team-diff-header medium-header">🎯 MEDIUM — Midfield Challengers</div>
+          <div class="team-select-grid">${medium.map(renderTeamCard).join('')}</div>
+        </div>
+
+        <div class="team-select-section">
+          <div class="team-diff-header hard-header">🔥 HARD — Against The Odds</div>
+          <div class="team-select-grid">${hard.map(renderTeamCard).join('')}</div>
+        </div>
+
+        <div class="team-select-section">
+          <div class="team-diff-header custom-header">🏗️ CUSTOM — Build Your Own</div>
+          <div class="team-select-grid">
+            <div class="team-card team-card-custom" onclick="UI.selectTeam('custom')">
+              <div class="team-card-top">
+                <span class="team-logo">🏎</span>
+                <div class="team-card-name">
+                  <h3>Custom Team</h3>
+                  <span class="diff-badge diff-custom">CUSTOM</span>
+                </div>
+                <span class="team-budget">$50k</span>
+              </div>
+              <p class="team-desc">Name your team and sign two drivers from the pool of F1 reserves and F2 racers. Driver costs come from your starting budget.</p>
+              <div class="custom-card-hint">TAP TO BUILD →</div>
+            </div>
+          </div>
+        </div>
+
         <button class="btn btn-ghost" onclick="UI.showTitle()">← BACK</button>
       </div>
     `);
   },
 
   selectTeam(teamId) {
-    SaveManager.deleteSave(); // clear any previous run
-    GameState.init(teamId);
+    if (teamId === 'custom') {
+      this.showCustomTeamBuilder();
+      return;
+    }
+    const team = AI_TEAMS.find(t => t.id === teamId);
+    if (!team) return;
+    SaveManager.deleteSave();
+    GameState.init(team);
+    this.showSeasonMap();
+  },
+
+  // Custom team builder state
+  _customState: { name: '', driver1: null, driver2: null },
+
+  showCustomTeamBuilder() {
+    this._customState = { name: '', driver1: null, driver2: null };
+    this._renderCustomBuilder();
+  },
+
+  _renderCustomBuilder() {
+    const st = this._customState;
+    const BUDGET = 50000;
+    const spent = (st.driver1?.cost || 0) + (st.driver2?.cost || 0);
+    const remaining = BUDGET - spent;
+    const canConfirm = st.name.trim().length > 0 && st.driver1 && st.driver2 && remaining >= 0;
+
+    const driverSlot = (n, d) => d
+      ? `<div class="driver-slot driver-slot-filled" onclick="UI._clearDriver(${n})">
+           <span class="slot-name">${d.name}</span>
+           <span class="slot-stats">Skill ${d.skill} · Quali ${d.qualifying} · Rain ${d.rain}</span>
+           <span class="slot-cost">$${d.cost.toLocaleString()}</span>
+           <span class="slot-remove">✕ remove</span>
+         </div>`
+      : `<div class="driver-slot driver-slot-empty"><span>👤 Driver ${n} — tap a driver below</span></div>`;
+
+    const poolCard = (d) => {
+      const isSelected = st.driver1?.name === d.name || st.driver2?.name === d.name;
+      const canAfford = remaining >= d.cost || isSelected;
+      return `
+        <div class="driver-pool-card ${isSelected ? 'pool-selected' : ''} ${!canAfford && !isSelected ? 'pool-unaffordable' : ''}"
+             onclick="${isSelected ? '' : `UI._pickDriver(${JSON.stringify(d).replace(/"/g, '&quot;')})`}">
+          <div class="pool-top">
+            <span class="pool-tier ${d.tier === 'F1 Reserve' ? 'tier-reserve' : 'tier-f2'}">${d.tier}</span>
+            <span class="pool-cost">$${d.cost.toLocaleString()}</span>
+          </div>
+          <div class="pool-name">#${d.number} ${d.name}</div>
+          <div class="pool-bio">${d.bio}</div>
+          <div class="pool-stats">
+            <span>Skill <b>${d.skill}</b></span>
+            <span>Quali <b>${d.qualifying}</b></span>
+            <span>Rain <b>${d.rain}</b></span>
+          </div>
+          ${isSelected ? '<div class="pool-selected-badge">✓ SIGNED</div>' : ''}
+        </div>
+      `;
+    };
+
+    this.render(`
+      <div class="screen">
+        <div class="screen-header">
+          <h2>🏗️ BUILD YOUR TEAM</h2>
+          <p>Name your team and sign two drivers. Driver salaries are deducted from your $50,000 starting budget.</p>
+        </div>
+
+        <div class="custom-name-section">
+          <label class="custom-label">TEAM NAME</label>
+          <input type="text" id="custom-name-input" class="custom-name-input"
+                 value="${st.name}" maxlength="24" placeholder="e.g. Apex Racing"
+                 oninput="UI._customState.name = this.value; UI._updateCustomConfirm()">
+        </div>
+
+        <div class="custom-budget-row">
+          <span>SIGNING BUDGET</span>
+          <span class="budget-amount ${remaining < 0 ? 'danger' : remaining < 8000 ? 'warning' : 'green'}">
+            $${remaining.toLocaleString()} remaining
+          </span>
+        </div>
+
+        <div class="driver-slots-row">
+          ${driverSlot(1, st.driver1)}
+          ${driverSlot(2, st.driver2)}
+        </div>
+
+        <div class="driver-pool-grid">
+          ${DRIVER_POOL.map(poolCard).join('')}
+        </div>
+
+        <div class="custom-footer">
+          <button class="btn btn-ghost" onclick="UI.showTeamSelect()">← BACK</button>
+          <button class="btn btn-primary" id="custom-confirm-btn"
+                  ${canConfirm ? '' : 'disabled'}
+                  onclick="UI._confirmCustomTeam()">
+            START SEASON →
+          </button>
+        </div>
+      </div>
+    `);
+  },
+
+  _pickDriver(driver) {
+    const st = this._customState;
+    if (!st.driver1) { st.driver1 = driver; }
+    else if (!st.driver2 && st.driver1.name !== driver.name) { st.driver2 = driver; }
+    this._renderCustomBuilder();
+  },
+
+  _clearDriver(slot) {
+    if (slot === 1) this._customState.driver1 = null;
+    else this._customState.driver2 = null;
+    this._renderCustomBuilder();
+  },
+
+  _updateCustomConfirm() {
+    const st = this._customState;
+    const btn = document.getElementById('custom-confirm-btn');
+    if (!btn) return;
+    const ok = st.name.trim().length > 0 && st.driver1 && st.driver2;
+    btn.disabled = !ok;
+  },
+
+  _confirmCustomTeam() {
+    const st = this._customState;
+    const BUDGET = 50000;
+    const spent = (st.driver1?.cost || 0) + (st.driver2?.cost || 0);
+    if (!st.name.trim() || !st.driver1 || !st.driver2 || spent > BUDGET) return;
+
+    const customTeam = {
+      id: 'custom',
+      name: st.name.trim(),
+      shortName: st.name.trim(),
+      color: '#888888',
+      logoEmoji: '🏎',
+      carStats: { speed: 63, downforce: 65, reliability: 66, pitSpeed: 74 },
+      startMoney: BUDGET - spent,
+      difficulty: 'custom',
+      description: 'Your team. Your rules.',
+      startingDeck: ['undercut', 'overcut', 'push_mode', 'tyre_management_mode', 'fresh_front_wing', 'bold_overtake', 'ers_deploy'],
+      drivers: [st.driver1, st.driver2],
+    };
+
+    SaveManager.deleteSave();
+    GameState.init(customTeam);
     this.showSeasonMap();
   },
 
