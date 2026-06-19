@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PITWALL — F1 Management Game</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎</text></svg>">
+</head>
+<body>
+  <div id="app">
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;color:#888;font-family:monospace;">
+      Loading PITWALL...
+    </div>
+  </div>
+
+  <!-- Load order matters: data first, then systems, then UI -->
+  <script src="js/data.js"></script>
+  <script src="js/tyres.js"></script>
+  <script src="js/simulation.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+
+  <script>
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.init();
+    });
+  </script>
+</body>
+</html>
