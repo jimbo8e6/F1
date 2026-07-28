@@ -131,9 +131,13 @@ function applyAccident(driver, outcome, year, round) {
 
 /* --------------------------------------------------------------- illness ---- */
 
+/* A driver being declared unfit on the morning of a race should be a story, not
+ * a fixture. The rate is deliberately low: across a full field it works out at
+ * roughly one withdrawal a season in the fifties — when the grid was old enough
+ * for it to happen at all — and rarer thereafter. */
 function rollIllness(driver, year, rng) {
   const age = year - driver.born;
-  const p = 0.010 + Math.max(0, age - 38) * 0.002;
+  const p = 0.0045 + Math.min(Math.max(0, age - 40) * 0.0013, 0.005);
   if (!rng.chance(p)) return null;
   return rng.int(1, 2);
 }

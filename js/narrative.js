@@ -88,7 +88,7 @@ const NARR = {
     "{artPart} failure pitched {driver} into the barriers on lap {lap}",
     "{driver}'s {part} let go on lap {lap} and put the car in the fence",
     "{artPart} broke on {driver}'s car on lap {lap} and sent it off the road",
-    "{driver} was a passenger from lap {lap}, the {part} having failed at speed",
+    "{driver}'s {part} failed at speed on lap {lap}, putting the car off the road",
   ],
   crashCollision: [
     '{driver} and {other} came together on lap {lap}',
