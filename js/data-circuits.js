@@ -151,7 +151,7 @@ const CIRCUITS = (() => {
  * venues, same sequence — so 1950 opens at Silverstone in May and finishes at
  * Monza in September, exactly as it did. Only the results are invented.
  *
- * Coverage runs 1950–1970. Seasons past that fall back to the generated
+ * Coverage runs 1950–2025. Seasons past that fall back to the generated
  * calendar, which picks era-appropriate venues and orders them by their usual
  * slot in the year. */
 const HISTORICAL_CALENDARS = {

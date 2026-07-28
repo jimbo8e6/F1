@@ -38,13 +38,19 @@ fastest car every winter. Deals run one to three seasons, which is what keeps an
 one driver from monopolising the championship, and what gives careers their bad
 luck as well as their good.
 
+**The calendars are real.** Every season from 1950 to 2025 runs its actual
+schedule: the same events, at the same venues, in the same order, with the real
+number of rounds. 1950 opens at Silverstone in May and ends at Monza in
+September. 1955 is cut to seven rounds after Le Mans. The 1980 Italian Grand Prix
+is at Imola, the 1982 Swiss Grand Prix is in France, and 2020 is the improvised
+seventeen-round scramble it really was, second visits and all. Past 2025 the sim
+generates its own calendars from era-appropriate venues.
+
 **The rules change with the eras.** Points systems follow the real ones (8-6-4-3-2
 with a point for fastest lap in the fifties, through to 25-18-15 today), including
 the decades when only a driver's best results counted. The constructors'
-championship does not exist before 1958. Calendars grow from seven rounds to
-twenty-two, and venues rotate the way they did — the British Grand Prix moves
-between Silverstone, Aintree and Brands Hatch. Cars broke constantly in 1955 and
-rarely break now.
+championship does not exist before 1958. Cars broke constantly in 1955 and rarely
+break now.
 
 ## Playing it
 
