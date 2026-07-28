@@ -70,18 +70,54 @@ const NARR = {
     'The race changed on lap {lap}, when {driver}\'s {part} failed from the lead',
     '{driver} was in command when the car broke on lap {lap}',
   ],
-  crash: [
+  /* Accidents, by what caused them. */
+  crashError: [
     '{driver} put it into the barriers on lap {lap}',
-    '{driver} lost it on lap {lap} and took no further part',
-    '{driver} went off on lap {lap}',
-    'Lap {lap} claimed {driver}, who spun out of contention',
-    '{driver} misjudged a pass on lap {lap} and ended up in the fence',
+    '{driver} lost the car on lap {lap} and spun out of contention',
+    '{driver} ran wide on lap {lap} and went off for good',
+    '{driver} got it wrong on lap {lap} and hit the fence',
+    'Lap {lap} claimed {driver}, who slid off unaided',
   ],
-  crashFirstLap: [
+  crashWeather: [
+    '{driver} aquaplaned off on lap {lap}',
+    '{driver} lost the car in the spray on lap {lap}',
+    'The conditions caught {driver} out on lap {lap}',
+    '{driver} found the standing water on lap {lap} and was pitched off',
+  ],
+  crashFailure: [
+    "{artPart} failure pitched {driver} into the barriers on lap {lap}",
+    "{driver}'s {part} let go on lap {lap} and put the car in the fence",
+    "{artPart} broke on {driver}'s car on lap {lap} and sent it off the road",
+    "{driver} was a passenger from lap {lap}, the {part} having failed at speed",
+  ],
+  crashCollision: [
+    '{driver} and {other} came together on lap {lap}',
+    '{driver} tried a move on {other} on lap {lap} and the two collided',
+    'Contact between {driver} and {other} on lap {lap}',
+    '{driver} and {other} touched wheels on lap {lap}',
+    '{driver} misjudged a pass on {other} on lap {lap}',
+  ],
+  crashStart: [
+    '{driver} and {other} collided at the first corner',
+    '{driver} and {other} tangled before the field had completed a lap',
+    'The run to the first corner put {driver} and {other} out on the spot',
+  ],
+  crashStartSolo: [
     '{driver} was eliminated at the first corner',
     '{driver} never completed a lap, collected in the opening-lap scramble',
     'The start accounted for {driver}',
-    '{driver}\'s afternoon lasted a matter of seconds',
+    "{driver}'s afternoon lasted a matter of seconds",
+  ],
+  /* Tail clauses for a two-car incident. */
+  bothOut: [
+    ', both out on the spot',
+    ', and neither car went any further',
+    ', putting both of them out',
+  ],
+  oneOut: [
+    ', {driver} out on the spot while {other} carried on with a damaged car',
+    ', though only {driver} retired from it',
+    ', {other} limping on while {driver} was done for the afternoon',
   ],
   /* Kept singular — these get an article in front of them. */
   parts: [
@@ -122,12 +158,12 @@ const NARR = {
   ],
   injuryMiss: [
     '{driver} was taken to hospital and is expected to miss {spell}',
-    '{driver} suffered injuries that will keep them out for {spell}',
+    '{driver} suffered injuries serious enough to sit out {spell}',
     '{driver} broke bones in the accident and faces {spell} on the sidelines',
   ],
   injurySeason: [
     '{driver} was badly hurt and will take no further part this season',
-    '{driver}\'s injuries end their year',
+    'Injuries end {driver}\'s season on the spot',
     '{driver} was seriously injured and is out for the remainder of the season',
   ],
   injuryCareer: [
@@ -183,6 +219,15 @@ function spellRaces(n) {
   return `the next ${NUMBER_WORDS[n] || n} rounds`;
 }
 
+/* Some circuits take a definite article: the Nürburgring, the Hungaroring. */
+function venuePhrase(venue) {
+  return /ring$|^AVUS$|Outer Circuit$/i.test(venue) ? `the ${venue}` : venue;
+}
+
+function sentenceCase(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 /* Turn one simulated race into a few sentences of prose. */
 function buildWriteup(race, ctx, rng) {
   const { drivers, standings, round, rounds, year } = ctx;
@@ -197,11 +242,13 @@ function buildWriteup(race, ctx, rng) {
   const third = finishers.find(r => r.pos === 3);
 
   // ------------------------------------------------------------- the win --
-  const opener = fill(
+  /* Some openers put the venue mid-sentence, some lead with it — so the article
+   * is always lower case and the finished sentence gets capitalised. */
+  const opener = sentenceCase(fill(
     race.mixed ? pick(rng, NARR.mixedOpen)
       : race.wet ? pick(rng, NARR.wetOpen)
       : pick(rng, NARR.dryOpen),
-    { venue: race.venue, gp: race.gp });
+    { venue: venuePhrase(race.venue), gp: race.gp }));
 
   let startPhrase;
   const g = winner.gridPos;
@@ -244,17 +291,59 @@ function buildWriteup(race, ctx, rng) {
     .filter(r => r.status === 'mechanical' || r.status === 'accident')
     .sort((a, b) => a.gridPos - b.gridPos);
 
-  for (const r of retirements.slice(0, 3)) {
-    const leaderish = r.gridPos <= 3 && r.lap > 20;
+  /* Anyone who was hurt must have their accident described, however far down
+   * the order they started — otherwise the report states a consequence whose
+   * cause it never mentioned. */
+  const hurt = new Set((race.incidents || []).map(i => i.driverId));
+  const hurtRows = retirements.filter(r => hurt.has(r.driverId));
+  const prominent = retirements.filter(r => !hurt.has(r.driverId)).slice(0, 3);
+  /* Injuries go in the list first so the cap can never drop one. */
+  const chosen = hurtRows.concat(prominent).slice(0, 6)
+    .sort((a, b) => a.gridPos - b.gridPos);
+
+  const told = new Set();
+  /* Only one car can have been leading. Without this, three separate drivers
+   * get described as having "looked set for the win" in the same afternoon. */
+  let leaderTold = false;
+
+  for (const r of chosen) {
+    if (told.has(r.driverId)) continue;
+    told.add(r.driverId);
+
     if (r.status === 'mechanical') {
+      const leaderish = !leaderTold && r.gridPos <= 3 && r.lap > 20;
+      if (leaderish) leaderTold = true;
       const part = pick(rng, partBank);
       dramas.push(fill(pick(rng, leaderish ? NARR.mechanicalLeader : NARR.mechanical), {
         driver: name(r.driverId), lap: r.lap, part, artPart: `${article(part)} ${part}`,
       }));
-    } else {
-      dramas.push(fill(pick(rng, r.firstLap ? NARR.crashFirstLap : NARR.crash), {
-        driver: name(r.driverId), lap: r.lap,
+      continue;
+    }
+
+    // ------------------------------------------------------- an accident --
+    const other = r.withDriverId ? name(r.withDriverId) : null;
+    const vars = { driver: name(r.driverId), other, lap: r.lap };
+
+    if ((r.cause === 'collision' || r.cause === 'start') && other) {
+      /* Describe a two-car incident once, from one side, and say what became
+       * of the other car. */
+      told.add(r.withDriverId);
+      const opening = pick(rng, r.cause === 'start' ? NARR.crashStart : NARR.crashCollision);
+      const tail = r.partnerRetired
+        ? pick(rng, NARR.bothOut)
+        : fill(pick(rng, NARR.oneOut), vars);
+      dramas.push(fill(opening, vars) + tail);
+    } else if (r.cause === 'failure') {
+      const part = pick(rng, partBank);
+      dramas.push(fill(pick(rng, NARR.crashFailure), {
+        ...vars, part, artPart: `${article(part)} ${part}`,
       }));
+    } else if (r.cause === 'weather') {
+      dramas.push(fill(pick(rng, NARR.crashWeather), vars));
+    } else if (r.cause === 'start') {
+      dramas.push(fill(pick(rng, NARR.crashStartSolo), vars));
+    } else {
+      dramas.push(fill(pick(rng, NARR.crashError), vars));
     }
   }
   if (dramas.length) parts.push(dramas.join('. ') + '.');

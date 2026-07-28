@@ -166,6 +166,61 @@ function simulateRace(entries, circuit, year, rng) {
     }
   }
 
+  /* Work out what actually caused each accident, and who else was caught up in
+   * it. A race report that says a driver was hurt without saying how reads like
+   * a non-sequitur, so every accident carries a cause from here on. */
+  const crashed = field.filter(f => f.status === 'accident');
+
+  for (const f of crashed) {
+    if (f.cause) continue;                  // already assigned as someone else's victim
+    if (f.firstLap) { f.cause = 'start'; continue; }
+
+    const roll = rng.next();
+    if (wet && roll < 0.30) f.cause = 'weather';
+    else if (roll < 0.56) f.cause = 'error';
+    else if (roll < 0.80) f.cause = 'collision';
+    else f.cause = 'failure';               // something broke and pitched them off
+  }
+
+  /* Pair up the accidents that involved two cars. The other party is someone
+   * they were plausibly racing — near them on the grid — and does not always
+   * retire from it. */
+  for (const f of crashed) {
+    if (f.partnerId) continue;
+    if (f.cause !== 'collision' && f.cause !== 'start') continue;
+
+    const pool = field.filter(o => o !== f && !o.partnerId &&
+      Math.abs(o.gridPos - f.gridPos) <= 6 &&
+      (o.status === 'running' || (o.status === 'accident' && !o.cause)));
+
+    if (!pool.length) {
+      /* Nobody was near enough — call it a mistake instead of inventing a
+       * collision with nobody. */
+      if (f.cause === 'collision') f.cause = 'error';
+      continue;
+    }
+
+    const other = pool[Math.floor(rng.next() * pool.length)];
+    /* Linked by id, never by object reference: the pair point at each other, and
+     * a cycle here would make the whole world unserialisable. */
+    f.partnerId = other.entry.driver.id;
+    other.partnerId = f.entry.driver.id;
+
+    if (other.status === 'running' && !rng.chance(0.55)) {
+      /* Survived the contact and carried on, damaged. */
+      other.survivedContact = true;
+      f.partnerRetired = false;
+    } else {
+      other.status = 'accident';
+      other.lap = f.lap;
+      other.cause = f.cause;
+      other.firstLap = f.firstLap;
+      other.taggedIn = true;                // reported as part of the same incident
+      other.partnerRetired = true;
+      f.partnerRetired = true;
+    }
+  }
+
   /* Where a driver ends up: race pace, plus how hard this circuit makes passing,
    * plus the day's noise. */
   const finishers = field.filter(f => f.status === 'running');
@@ -196,6 +251,8 @@ function simulateRace(entries, circuit, year, rng) {
     gridPos: f.gridPos,
     status: 'finished',
     lap: null,
+    /* Carried on after contact — worth a clause in the report. */
+    contactWith: f.survivedContact ? f.partnerId : null,
   })).concat(retirements.map(f => ({
     driverId: f.entry.driver.id,
     teamId: f.entry.team.id,
@@ -204,6 +261,12 @@ function simulateRace(entries, circuit, year, rng) {
     status: f.status,
     lap: f.lap,
     firstLap: !!f.firstLap,
+    cause: f.cause || null,
+    withDriverId: f.partnerId || null,
+    /* True when this car was collected in someone else's accident, so the
+     * report describes the incident once rather than twice. */
+    taggedIn: !!f.taggedIn,
+    partnerRetired: !!f.partnerRetired,
   })));
 
   return {

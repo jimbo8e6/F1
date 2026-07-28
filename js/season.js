@@ -366,6 +366,11 @@ function runRound(world, rng) {
     firstEverRace: year === 1950 && roundNo === 1,
   }, rng);
 
+  /* The per-car working state exists only to write the report. Keeping it would
+   * persist a full copy of every driver and team object with every race, which
+   * bloats the save enormously and outgrows localStorage within a few seasons. */
+  delete race.field;
+
   world.races.push(race);
 
   if (world.round >= rounds) finishSeason(world, rng);
