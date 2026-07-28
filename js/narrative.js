@@ -197,6 +197,19 @@ const NARR = {
 
 function pick(rng, list) { return list[Math.floor(rng.next() * list.length)]; }
 
+/* Pick from a bank while avoiding anything already used in this passage — three
+ * drivers in a row "having had enough" reads like a template, because it is. */
+function pickFresh(rng, list, used) {
+  const fresh = list.filter(t => !used.has(t));
+  const choice = pick(rng, fresh.length ? fresh : list);
+  used.add(choice);
+  return choice;
+}
+
+function plural(n, word) {
+  return `${n} ${word}${n === 1 ? '' : 's'}`;
+}
+
 function fill(tpl, vars) {
   return tpl.replace(/\{(\w+)\}/g, (m, k) => (vars[k] !== undefined ? vars[k] : m));
 }
@@ -421,6 +434,144 @@ function buildWriteup(race, ctx, rng) {
     }
   }
 
+  return parts.join(' ');
+}
+
+/* ---------------------------------------------------------- pre-season ---- */
+
+const PRE = {
+  champReturns: [
+    '{driver} returns to defend the title',
+    '{driver} begins the year as champion',
+    'The championship reopens with {driver} as the man to beat',
+  ],
+  retireAge: [
+    '{driver} has retired at {age}',
+    '{driver} calls it a career at {age}',
+    '{driver} steps down after {seasonsPhrase}',
+    '{driver} has had enough, and stops at {age}',
+  ],
+  retireForm: [
+    '{driver} has given it up after a run of seasons with nothing to show for them',
+    '{driver} retires, the results having dried up',
+    '{driver} walks away with little left to prove and less to show',
+  ],
+  retireSeries: [
+    '{driver} leaves Grand Prix racing for {series}',
+    '{driver} has gone to {series}',
+    '{driver} takes up {series} instead',
+    '{driver} abandons the championship in favour of {series}',
+  ],
+  retireInjury: [
+    '{driver} will not race again, the injuries too severe to come back from',
+    "{driver}'s career was ended by injury last season",
+    '{driver} never recovered from last season\'s accident and retires',
+  ],
+  retireNoSeat: [
+    '{driver} leaves the championship, unable to find a drive',
+    'No team would have {driver}, who drops out of the championship',
+    '{driver} could not find a seat and is gone',
+  ],
+  debutOne: [
+    '{driver} makes a championship debut with {team}',
+    '{team} hand a first Grand Prix drive to {driver}',
+    '{driver}, {age}, arrives at {team}',
+    '{driver} steps up to {team}',
+  ],
+  moveOne: [
+    '{driver} leaves {from} for {to}',
+    '{driver} has signed for {to}, ending a spell at {from}',
+    '{to} take {driver} from {from}',
+    '{driver} swaps {from} for {to}',
+  ],
+  lostOne: [
+    '{driver} lost the {from} seat and has no drive',
+    '{from} have let {driver} go, with nothing lined up',
+  ],
+  quiet: [
+    'The grid is much as it was.',
+    'Little changed over the winter.',
+    'The field reassembles largely unaltered.',
+  ],
+};
+
+/* A written summary of the winter: who stopped, who arrives, and who moved. */
+function buildPreseason(world, data, rng) {
+  const name = id => (world.drivers[id] ? world.drivers[id].name : id);
+  const team = id => {
+    const t = TEAMS.find(x => x.id === id);
+    return t ? t.name : id;
+  };
+  const parts = [];
+
+  /* The reigning champion, carried over from last season's record. */
+  const last = world.history[world.history.length - 1];
+  if (last && last.champion && world.drivers[last.champion] &&
+      world.drivers[last.champion].status !== 'retired') {
+    parts.push(fill(pick(rng, PRE.champReturns), { driver: name(last.champion) }) + '.');
+  }
+
+  // ------------------------------------------------------- retirements ----
+  if (data.retired.length) {
+    const told = [];
+    const used = new Set();
+    for (const r of data.retired.slice(0, 4)) {
+      const bank = r.reason === 'injury' ? PRE.retireInjury
+        : r.reason === 'series' ? PRE.retireSeries
+        : r.reason === 'form' ? PRE.retireForm
+        : r.reason === 'noSeat' ? PRE.retireNoSeat
+        : PRE.retireAge;
+      told.push(fill(pickFresh(rng, bank, used), {
+        driver: name(r.id), age: r.age,
+        seasonsPhrase: plural(Math.max(1, r.seasons), 'season'),
+        series: r.series || 'other racing',
+      }));
+    }
+    let sentence = told.join('. ') + '.';
+    const rest = data.retired.length - 4;
+    if (rest > 0) {
+      sentence += ` ${rest} other${rest > 1 ? 's' : ''} left the championship over the winter.`;
+    }
+    parts.push(sentence);
+  }
+
+  // ------------------------------------------------------------ debuts ----
+  if (data.debuts.length) {
+    const usedD = new Set();
+    const shown = data.debuts.slice(0, 4).map(d => fill(pickFresh(rng, PRE.debutOne, usedD), {
+      driver: name(d.id), team: team(d.teamId), age: d.age,
+    }));
+    let sentence = shown.join('. ') + '.';
+    const rest = data.debuts.length - 4;
+    if (rest > 0) {
+      sentence += ` ${rest} further newcomer${rest > 1 ? 's take' : ' takes'} a seat.`;
+    }
+    parts.push(sentence);
+  }
+
+  // ------------------------------------------------------------- moves ----
+  if (data.moves.length) {
+    const usedM = new Set();
+    const shown = data.moves.slice(0, 4).map(m => fill(pickFresh(rng, PRE.moveOne, usedM), {
+      driver: name(m.id), from: team(m.from), to: team(m.to),
+    }));
+    let sentence = shown.join('. ') + '.';
+    const rest = data.moves.length - 4;
+    if (rest > 0) sentence += ` ${rest} other seat${rest > 1 ? 's' : ''} changed hands.`;
+    parts.push(sentence);
+  }
+
+  // ------------------------------------------------- drivers left out ----
+  if (data.lost.length) {
+    const worth = data.lost.filter(l => l.starts >= 6).slice(0, 2);
+    if (worth.length) {
+      parts.push(worth.map(l => fill(pick(rng, PRE.lostOne), {
+        driver: name(l.id), from: team(l.from),
+      })).join('. ') + '.');
+    }
+  }
+
+  if (parts.length <= 1) parts.push(pick(rng, PRE.quiet));
   return parts.join(' ');
 }
 

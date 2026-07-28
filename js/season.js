@@ -470,8 +470,63 @@ function finishSeason(world, rng) {
   world.seasonOver = true;
 }
 
+/* Gather what changed over the winter: who stopped and why, who arrives, and who
+ * has moved. Called after the new season's seats have been handed out, with a
+ * snapshot of where everyone sat the year before. */
+function buildPreseasonData(world, before) {
+  const prevYear = world.year - 1;
+
+  /* Everyone whose career ended during or after last season — including the
+   * drivers whose injuries ended it mid-campaign. */
+  /* Only drivers who actually started a Grand Prix are news. The early fifties
+   * are full of one-off privateers who entered once and were never seen again;
+   * listing them as retirements would swamp the report. */
+  const retired = Object.values(world.drivers)
+    .filter(d => d.retiredYear === prevYear && d.career.starts > 0)
+    .map(d => ({
+      id: d.id,
+      reason: d.retiredReason,
+      series: d.retiredSeries || null,
+      age: prevYear - d.born,
+      seasons: d.career.seasonsRun,
+      starts: d.career.starts,
+      wins: d.career.wins,
+      titles: d.career.titles,
+      lastTeam: before[d.id] || null,
+    }))
+    .sort((a, b) => b.titles - a.titles || b.wins - a.wins || b.starts - a.starts);
+
+  const debuts = [], moves = [], lost = [];
+
+  for (const d of Object.values(world.drivers)) {
+    const prev = before[d.id] || null;
+
+    if (d.teamId && d.career.starts === 0) {
+      debuts.push({ id: d.id, teamId: d.teamId, age: world.year - d.born });
+    } else if (d.teamId && prev && d.teamId !== prev) {
+      moves.push({ id: d.id, from: prev, to: d.teamId, wins: d.career.wins, titles: d.career.titles });
+    } else if (!d.teamId && prev && d.status !== 'retired') {
+      lost.push({ id: d.id, from: prev, starts: d.career.starts });
+    }
+  }
+
+  moves.sort((a, b) => b.titles - a.titles || b.wins - a.wins);
+
+  return { year: world.year, retired, debuts, moves, lost };
+}
+
 function advanceYear(world, rng) {
+  /* Record where everyone sat before the market moves them. */
+  const before = {};
+  for (const d of Object.values(world.drivers)) {
+    if (d.teamId) before[d.id] = d.teamId;
+  }
+
   runOffseason(world, rng);
   world.year += 1;
   startSeason(world, rng);
+
+  const data = buildPreseasonData(world, before);
+  data.text = buildPreseason(world, data, rng);
+  world.preseason = data;
 }

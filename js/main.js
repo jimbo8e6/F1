@@ -88,6 +88,9 @@ document.addEventListener('click', ev => {
   const tm = ev.target.closest('[data-team]');
   if (tm) { go('team', tm.dataset.team); return; }
 
+  const pre = ev.target.closest('[data-preseason]');
+  if (pre) { go('preseason', null); return; }
+
   const race = ev.target.closest('[data-race]');
   if (race) { go('race', parseInt(race.dataset.race, 10)); return; }
 

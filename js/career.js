@@ -168,16 +168,33 @@ function retirementChance(driver, year, hadSeat) {
   return Math.max(0, Math.min(0.96, p));
 }
 
-function retireDriver(driver, year, reason) {
+/* Where drivers go when they leave Grand Prix racing but are not finished as
+ * racing drivers. The options move with the era. */
+const OTHER_SERIES = [
+  { to: 1969, names: ['sports car racing', 'the Indianapolis 500', 'motorcycle racing',
+                      'Formula Two', 'hillclimbing'] },
+  { to: 1989, names: ['sports car racing', 'IndyCar', 'rallying', 'touring cars', 'Can-Am'] },
+  { to: 2012, names: ['IndyCar', 'sports car racing', 'touring cars', 'rallying', 'NASCAR'] },
+  { to: 9999, names: ['Formula E', 'sports car racing', 'IndyCar', 'NASCAR', 'touring cars'] },
+];
+
+function pickSeries(year, rng) {
+  const era = OTHER_SERIES.find(e => year <= e.to) || OTHER_SERIES[OTHER_SERIES.length - 1];
+  return rng.pick(era.names);
+}
+
+function retireDriver(driver, year, reason, series) {
   driver.status = 'retired';
   driver.retiredYear = year;
   driver.retiredReason = reason;
+  driver.retiredSeries = series || null;
   driver.teamId = null;
   driver.contractYears = 0;
   const label = {
     age: 'Retired from Grand Prix racing.',
     form: 'Retired after a run of seasons without results.',
     noSeat: 'Left the championship, unable to find a drive.',
+    series: `Left Grand Prix racing for ${series}.`,
   }[reason] || 'Retired.';
   driver.story.push({ year, round: null, type: 'retirement', text: label });
 }
@@ -342,8 +359,16 @@ function runOffseason(world, rng) {
     const p = retirementChance(d, year, hadSeat);
     if (rng.chance(p)) {
       const age = year - d.born;
-      const reason = !hadSeat ? 'noSeat' : (d.barrenYears >= 2 && age < 36 ? 'form' : 'age');
-      retireDriver(d, year, reason);
+      let reason, series = null;
+
+      if (!hadSeat) reason = 'noSeat';
+      else if (d.barrenYears >= 2 && age < 36) reason = 'form';
+      /* Still young enough to be wanted elsewhere — plenty of drivers left for
+       * sports cars or Indianapolis rather than stopping altogether. */
+      else if (age < 38 && rng.chance(0.4)) { reason = 'series'; series = pickSeries(year, rng); }
+      else reason = 'age';
+
+      retireDriver(d, year, reason, series);
     }
   }
 }

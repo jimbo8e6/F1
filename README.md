@@ -25,7 +25,13 @@ retire on the simulation's terms instead.
 **Careers end in every way except that one.** A driver can be hurt badly enough to
 miss a race, a run of races, or a whole season. They can fall ill on a race
 morning. They can lose their drive, fail to find another, and drift out of the
-sport. They can grow old, or simply stop being quick enough and walk away.
+sport. They can leave for sports cars or Indianapolis. They can grow old, or
+simply stop being quick enough and walk away.
+
+**Every winter gets its own report.** From 1951 on, each season opens with the
+off-season news: who retired and why, who arrives and at which team, and who has
+moved. It sits at the top of the season before the first race and stays reachable
+from the calendar afterwards.
 
 **Machinery follows history, roughly.** Constructor competitiveness is anchored to
 real form curves — Alfa untouchable in 1950, Mercedes arriving in 1954, Williams

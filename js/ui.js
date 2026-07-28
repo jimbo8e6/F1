@@ -44,18 +44,14 @@ function statusPill(d) {
   return `<span class="status-pill st-${d.status}">${label}</span>`;
 }
 
-/* Turn driver names inside a generated race report into links, longest names
- * first so "Michael Schumacher" is not eaten by "Ralf Schumacher". */
-function linkifyReport(world, text, race) {
-  const ids = new Set(race.results.map(r => r.driverId));
-  for (const inc of (race.incidents || [])) ids.add(inc.driverId);
-  for (const w of (race.withdrawals || [])) ids.add(w.driverId);
-  /* The championship sentence can name drivers who did not start this race. */
-  for (const d of Object.values(world.drivers)) {
-    if (d.teamId && text.includes(d.name)) ids.add(d.id);
-  }
-
-  const names = [...ids]
+/* Turn driver names inside generated prose into links.
+ *
+ * Longest names first, so "Michael Schumacher" is not eaten by "Ralf
+ * Schumacher". Substitution goes via NUL sentinels rather than anything that
+ * could occur naturally — this prose is full of lap numbers, ages, points
+ * totals and counts that a bare-number placeholder would collide with. */
+function linkifyDrivers(world, text, candidates) {
+  const names = candidates
     .map(id => ({ id, name: world.drivers[id] ? world.drivers[id].name : null }))
     .filter(x => x.name)
     .sort((a, b) => b.name.length - a.name.length);
@@ -70,6 +66,23 @@ function linkifyReport(world, text, race) {
     out = out.split(safe).join(token);
   }
   return out.replace(/\u0000(\d+)\u0000/g, (m, i) => placeholders[+i]);
+}
+
+function linkifyReport(world, text, race) {
+  const ids = new Set(race.results.map(r => r.driverId));
+  for (const inc of (race.incidents || [])) ids.add(inc.driverId);
+  for (const w of (race.withdrawals || [])) ids.add(w.driverId);
+  /* The championship sentence can name drivers who did not start this race. */
+  for (const d of Object.values(world.drivers)) {
+    if (d.teamId && text.includes(d.name)) ids.add(d.id);
+  }
+  return linkifyDrivers(world, text, [...ids]);
+}
+
+/* The winter report names retired drivers too, who have no seat to find them by. */
+function linkifyNames(world, text) {
+  return linkifyDrivers(world, text,
+    Object.values(world.drivers).filter(d => text.includes(d.name)).map(d => d.id));
 }
 
 /* --------------------------------------------------------------- clock ---- */
@@ -115,6 +128,8 @@ function renderSeason(world) {
         </div>
       </div>`;
     left += resultTable(world, last);
+  } else if (world.preseason && world.preseason.year === world.year) {
+    left += preseasonCard(world);
   } else {
     left += `
       <div class="card"><div class="empty">
@@ -169,6 +184,21 @@ function resultTable(world, race) {
     </div>`;
 }
 
+/* The winter's news, set like a race report. */
+function preseasonCard(world) {
+  const p = world.preseason;
+  if (!p) return '';
+  return `
+    <div class="card">
+      <div class="report">
+        <div class="report-kicker">Before the season</div>
+        <h2>${p.year} — the winter</h2>
+        <div class="report-venue">Retirements · debuts · driver moves</div>
+        <p class="report-body">${linkifyNames(world, p.text)}</p>
+      </div>
+    </div>`;
+}
+
 function calendarCard(world) {
   const rows = world.calendar.map((c, i) => {
     const race = world.races[i];
@@ -190,11 +220,20 @@ function calendarCard(world) {
       </div>`;
   }).join('');
 
+  /* Keep the winter's news reachable once the racing has started. */
+  const winter = (world.preseason && world.preseason.year === world.year)
+    ? `<div class="cal-row done" data-preseason="1">
+         <span class="cal-no">—</span>
+         <span class="cal-gp">Before the season</span>
+         <span class="cal-win">Winter news</span>
+       </div>`
+    : '';
+
   return `
     <div class="card">
       <div class="card-head"><h3>${world.year} Calendar</h3>
         <span class="meta">${world.calendar.length} rounds</span></div>
-      <div class="card-body flush">${rows}</div>
+      <div class="card-body flush">${winter}${rows}</div>
     </div>`;
 }
 
@@ -240,6 +279,13 @@ function constructorCard(world, constructors) {
 }
 
 /* ---------------------------------------------------------- past race ---- */
+
+function renderPreseason(world) {
+  const p = world.preseason;
+  if (!p) return `<div class="card"><div class="empty">No winter report.</div></div>`;
+  return `<span class="backlink" data-view="season">← Back to the season</span>
+    ${preseasonCard(world)}`;
+}
 
 function renderRace(world, index) {
   const race = world.races[index];
@@ -579,6 +625,7 @@ function render(game) {
   let html;
   if (v.name === 'season') html = renderSeason(world);
   else if (v.name === 'race') html = renderRace(world, v.arg);
+  else if (v.name === 'preseason') html = renderPreseason(world);
   else if (v.name === 'drivers') html = renderDrivers(world);
   else if (v.name === 'driver') html = renderDriver(world, v.arg);
   else if (v.name === 'teams') html = renderTeams(world);
@@ -589,7 +636,7 @@ function render(game) {
   el('main').innerHTML = html;
 
   /* Highlight whichever top-level tab this view belongs to. */
-  const tabFor = { season: 'season', race: 'season', drivers: 'drivers',
+  const tabFor = { season: 'season', race: 'season', preseason: 'season', drivers: 'drivers',
     driver: 'drivers', teams: 'teams', team: 'teams', history: 'history' };
   const active = tabFor[v.name] || 'season';
   for (const b of document.querySelectorAll('.tab')) {
