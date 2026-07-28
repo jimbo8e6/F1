@@ -38,11 +38,23 @@ const CIRCUITS = (() => {
   c('oporto', 'Portuguese Grand Prix', 'Oporto', 'PT', 1958, 1960, 'street');
   c('sebring', 'United States Grand Prix', 'Sebring', 'US', 1959, 1959, 'technical');
 
+  // One-off and short-lived venues of the fifties and sixties. Several hosted a
+  // single championship round and never returned.
+  c('pescara', 'Pescara Grand Prix', 'Pescara', 'IT', 1957, 1957, 'classic');
+  c('aindiab', 'Moroccan Grand Prix', 'Ain-Diab', 'MA', 1958, 1958, 'fast');
+  c('avus', 'German Grand Prix', 'AVUS', 'DE', 1959, 1959, 'fast');
+  c('monsanto', 'Portuguese Grand Prix', 'Monsanto', 'PT', 1959, 1959, 'street');
+  c('eastlondon', 'South African Grand Prix', 'East London', 'ZA', 1962, 1965, 'fast');
+  c('zeltweg', 'Austrian Grand Prix', 'Zeltweg', 'AT', 1964, 1964, 'technical');
+  c('clermont', 'French Grand Prix', 'Clermont-Ferrand', 'FR', 1965, 1972, 'classic');
+  c('lemansbugatti', 'French Grand Prix', 'Le Mans (Bugatti)', 'FR', 1967, 1967, 'technical');
+  c('stjovite', 'Canadian Grand Prix', 'Mont-Tremblant', 'CA', 1968, 1970, 'technical');
+
   // Sixties
   c('riverside', 'United States Grand Prix', 'Riverside', 'US', 1960, 1960, 'technical');
   c('watkinsglen', 'United States Grand Prix', 'Watkins Glen', 'US', 1961, 1980, 'technical');
   c('kyalami', 'South African Grand Prix', 'Kyalami', 'ZA', 1962, 1993, 'fast');
-  c('rouen', 'French Grand Prix', 'Rouen-les-Essarts', 'FR', 1962, 1968, 'classic');
+  c('rouen', 'French Grand Prix', 'Rouen-les-Essarts', 'FR', 1952, 1968, 'classic');
   c('mexico', 'Mexican Grand Prix', 'Mexico City', 'MX', 1963, 1992, 'technical');
   c('brands', 'British Grand Prix', 'Brands Hatch', 'GB', 1964, 1986, 'technical');
   c('mosport', 'Canadian Grand Prix', 'Mosport', 'CA', 1967, 1977, 'fast');
@@ -57,7 +69,7 @@ const CIRCUITS = (() => {
   c('dijon', 'French Grand Prix', 'Dijon-Prenois', 'FR', 1974, 1984, 'fast');
   c('longbeach', 'United States Grand Prix West', 'Long Beach', 'US', 1976, 1983, 'street');
   c('fuji', 'Japanese Grand Prix', 'Fuji', 'JP', 1976, 1977, 'fast');
-  c('hockenheim', 'German Grand Prix', 'Hockenheim', 'DE', 1977, 2019, 'fast');
+  c('hockenheim', 'German Grand Prix', 'Hockenheim', 'DE', 1970, 2019, 'fast');
   c('montreal', 'Canadian Grand Prix', 'Montreal', 'CA', 1978, 9999, 'technical');
 
   // Eighties
@@ -97,6 +109,41 @@ const CIRCUITS = (() => {
   return out;
 })();
 
+/* The real championship calendars, in the order the rounds were actually run.
+ *
+ * Where a year appears here the season uses it verbatim — same events, same
+ * venues, same sequence — so 1950 opens at Silverstone in May and finishes at
+ * Monza in September, exactly as it did. Only the results are invented.
+ *
+ * Coverage runs 1950–1970. Seasons past that fall back to the generated
+ * calendar, which picks era-appropriate venues and orders them by their usual
+ * slot in the year. */
+const HISTORICAL_CALENDARS = {
+  1950: ['silverstone', 'monaco', 'indianapolis', 'bremgarten', 'spa', 'reims', 'monza'],
+  1951: ['bremgarten', 'indianapolis', 'spa', 'reims', 'silverstone', 'nurburgring', 'monza', 'pedralbes'],
+  1952: ['bremgarten', 'indianapolis', 'spa', 'rouen', 'silverstone', 'nurburgring', 'zandvoort', 'monza'],
+  1953: ['buenosaires', 'indianapolis', 'zandvoort', 'spa', 'reims', 'silverstone', 'nurburgring', 'bremgarten', 'monza'],
+  1954: ['buenosaires', 'indianapolis', 'spa', 'reims', 'silverstone', 'nurburgring', 'bremgarten', 'monza', 'pedralbes'],
+  /* 1955 was cut short: the French, German, Swiss and Spanish rounds were all
+   * cancelled in the aftermath of Le Mans. */
+  1955: ['buenosaires', 'monaco', 'indianapolis', 'spa', 'zandvoort', 'aintree', 'monza'],
+  1956: ['buenosaires', 'monaco', 'indianapolis', 'spa', 'reims', 'silverstone', 'nurburgring', 'monza'],
+  1957: ['buenosaires', 'monaco', 'indianapolis', 'rouen', 'aintree', 'nurburgring', 'pescara', 'monza'],
+  1958: ['buenosaires', 'monaco', 'zandvoort', 'indianapolis', 'spa', 'reims', 'silverstone', 'nurburgring', 'oporto', 'monza', 'aindiab'],
+  1959: ['monaco', 'indianapolis', 'zandvoort', 'reims', 'aintree', 'avus', 'monsanto', 'monza', 'sebring'],
+  1960: ['buenosaires', 'monaco', 'indianapolis', 'zandvoort', 'spa', 'reims', 'silverstone', 'oporto', 'monza', 'riverside'],
+  1961: ['monaco', 'zandvoort', 'spa', 'reims', 'aintree', 'nurburgring', 'monza', 'watkinsglen'],
+  1962: ['zandvoort', 'monaco', 'spa', 'rouen', 'aintree', 'nurburgring', 'monza', 'watkinsglen', 'eastlondon'],
+  1963: ['monaco', 'spa', 'zandvoort', 'reims', 'silverstone', 'nurburgring', 'monza', 'watkinsglen', 'mexico', 'eastlondon'],
+  1964: ['monaco', 'zandvoort', 'spa', 'rouen', 'brands', 'nurburgring', 'zeltweg', 'monza', 'watkinsglen', 'mexico'],
+  1965: ['eastlondon', 'monaco', 'spa', 'clermont', 'silverstone', 'zandvoort', 'nurburgring', 'monza', 'watkinsglen', 'mexico'],
+  1966: ['monaco', 'spa', 'reims', 'brands', 'zandvoort', 'nurburgring', 'monza', 'watkinsglen', 'mexico'],
+  1967: ['kyalami', 'monaco', 'zandvoort', 'spa', 'lemansbugatti', 'silverstone', 'nurburgring', 'mosport', 'monza', 'watkinsglen', 'mexico'],
+  1968: ['kyalami', 'jarama', 'monaco', 'spa', 'zandvoort', 'rouen', 'brands', 'nurburgring', 'monza', 'stjovite', 'watkinsglen', 'mexico'],
+  1969: ['kyalami', 'montjuic', 'monaco', 'zandvoort', 'clermont', 'silverstone', 'nurburgring', 'monza', 'mosport', 'watkinsglen', 'mexico'],
+  1970: ['kyalami', 'jarama', 'monaco', 'spa', 'zandvoort', 'clermont', 'brands', 'hockenheim', 'osterreichring', 'monza', 'stjovite', 'watkinsglen', 'mexico'],
+};
+
 /* Target calendar length by era — the championship grew from seven rounds to
  * well over twenty. */
 function calendarSize(year) {
@@ -118,6 +165,8 @@ const RAIN_CHANCE = {
   shanghai: 0.18, bremgarten: 0.24, aintree: 0.24, oporto: 0.14, estoril: 0.12,
   bahrain: 0.02, abudhabi: 0.02, jeddah: 0.02, losail: 0.02, vegas: 0.03,
   kyalami: 0.10, mexico: 0.12, indianapolis: 0.10,
+  clermont: 0.20, stjovite: 0.20, zeltweg: 0.18, lemansbugatti: 0.18, avus: 0.16,
+  monsanto: 0.10, eastlondon: 0.10, pescara: 0.07, aindiab: 0.04,
 };
 
 function rainChance(circuitId) {

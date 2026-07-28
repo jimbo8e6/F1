@@ -24,6 +24,17 @@ const GP_ORDER = {
 };
 
 function buildCalendar(year, rng) {
+  /* Seasons with a real calendar on record run it exactly: same events, same
+   * venues, same order. Only the racing is invented. */
+  const historical = HISTORICAL_CALENDARS[year];
+  if (historical) {
+    const byId = {};
+    for (const c of CIRCUITS) byId[c.id] = c;
+    const cal = historical.map(id => byId[id]).filter(Boolean);
+    if (cal.length === historical.length) return cal;
+    console.warn(`Calendar for ${year} references unknown circuits; falling back.`);
+  }
+
   const eligible = CIRCUITS.filter(c => year >= c.from && year <= c.to);
 
   /* One venue per Grand Prix — the British round is at Silverstone or Aintree or
