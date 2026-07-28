@@ -21,6 +21,16 @@ const GP_ORDER = {
   'United States Grand Prix': 80, 'United States Grand Prix West': 26,
   'Detroit Grand Prix': 56, 'Mexican Grand Prix': 84, 'Azerbaijan Grand Prix': 44,
   'Qatar Grand Prix': 86, 'Las Vegas Grand Prix': 88, 'Abu Dhabi Grand Prix': 92,
+  /* Later names for rounds that were renamed rather than moved, plus the
+   * one-off titles — needed so the generated calendar past 2025 still runs in a
+   * sensible order. */
+  'Emilia Romagna Grand Prix': 28, 'São Paulo Grand Prix': 85,
+  'Mexico City Grand Prix': 84, 'Swedish Grand Prix': 48,
+  'Indian Grand Prix': 82, 'Pacific Grand Prix': 21,
+  'Luxembourg Grand Prix': 68, 'Styrian Grand Prix': 61,
+  'Tuscan Grand Prix': 69, 'Eifel Grand Prix': 71, 'Sakhir Grand Prix': 90,
+  '70th Anniversary Grand Prix': 55, 'Caesars Palace Grand Prix': 90,
+  'Dallas Grand Prix': 57, 'Moroccan Grand Prix': 90, 'Pescara Grand Prix': 68,
 };
 
 function buildCalendar(year, rng) {
